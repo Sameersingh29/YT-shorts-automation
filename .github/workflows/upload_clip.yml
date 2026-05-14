@@ -1,0 +1,70 @@
+name: Upload Clip
+
+on:
+  # Runs 2x daily: 9 AM IST and 9 PM IST
+  schedule:
+    - cron: '30 3 * * *'   # 3:30 AM UTC = 9:00 AM IST
+    - cron: '30 15 * * *'  # 3:30 PM UTC = 9:00 PM IST
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Time slot for scheduling'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - morning
+          - evening
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Determine time slot
+        id: slot
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "${{ inputs.slot }}" != "" ] && [ "${{ inputs.slot }}" != "auto" ]; then
+            SLOT="${{ inputs.slot }}"
+          elif [ "$HOUR" -lt 12 ]; then
+            SLOT="morning"
+          else
+            SLOT="evening"
+          fi
+          echo "slot=$SLOT" >> $GITHUB_OUTPUT
+          echo "Time slot: $SLOT"
+
+      - name: Upload next clip to YouTube
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          YOUTUBE_CLIENT_SECRET_JSON: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          DRIVE_QUEUE_FOLDER_ID: ${{ secrets.DRIVE_QUEUE_FOLDER_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python upload_clip.py --slot ${{ steps.slot.outputs.slot }}
+
+      - name: Commit analytics updates
+        run: |
+          git config user.name "YT Shorts Bot"
+          git config user.email "bot@yt-shorts-automation.local"
+          git add data/queue.json data/analytics.json
+          git diff --staged --quiet || git commit -m "📤 Uploaded clip — ${{ steps.slot.outputs.slot }} $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push

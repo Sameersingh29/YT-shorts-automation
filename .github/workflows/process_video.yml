@@ -1,0 +1,91 @@
+name: Process Video
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      video_id:
+        description: 'Google Drive video file ID (leave empty to auto-pick)'
+        required: false
+        type: string
+      folder_id:
+        description: 'Google Drive source folder ID (overrides env var)'
+        required: false
+        type: string
+
+  # Auto-trigger: check every 3 days if queue needs refilling
+  schedule:
+    - cron: '0 0 */3 * *'  # Every 3 days at midnight UTC
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hour max for long videos
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download Montserrat ExtraBold font
+        run: |
+          mkdir -p templates/fonts
+          curl -L -o /tmp/Montserrat.zip "https://fonts.google.com/download?family=Montserrat"
+          unzip -o /tmp/Montserrat.zip -d /tmp/montserrat
+          find /tmp/montserrat -name "*ExtraBold*" -name "*.ttf" | head -1 | xargs -I {} cp {} templates/fonts/Montserrat-ExtraBold.ttf
+          ls -la templates/fonts/
+
+      - name: Check queue size
+        id: check_queue
+        run: |
+          QUEUE_SIZE=$(python -c "
+          import json
+          try:
+              data = json.load(open('data/queue.json'))
+              pending = [c for c in data.get('clips', []) if c.get('status') == 'pending']
+              print(len(pending))
+          except:
+              print(0)
+          ")
+          echo "queue_size=$QUEUE_SIZE" >> $GITHUB_OUTPUT
+          echo "Current queue size: $QUEUE_SIZE"
+
+      - name: Skip if queue is sufficient
+        if: >
+          github.event_name == 'schedule' &&
+          steps.check_queue.outputs.queue_size >= 4
+        run: |
+          echo "Queue has ${{ steps.check_queue.outputs.queue_size }} pending clips. Skipping processing."
+          exit 0
+
+      - name: Process video
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DRIVE_SOURCE_FOLDER_ID: ${{ secrets.DRIVE_SOURCE_FOLDER_ID }}
+          DRIVE_QUEUE_FOLDER_ID: ${{ secrets.DRIVE_QUEUE_FOLDER_ID }}
+        run: |
+          python process_video.py \
+            ${{ inputs.video_id && format('--video-id {0}', inputs.video_id) || '' }} \
+            ${{ inputs.folder_id && format('--folder-id {0}', inputs.folder_id) || '' }}
+
+      - name: Commit queue updates
+        run: |
+          git config user.name "YT Shorts Bot"
+          git config user.email "bot@yt-shorts-automation.local"
+          git add data/queue.json data/processed_videos.json
+          git diff --staged --quiet || git commit -m "🤖 Processed video — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push

@@ -1,0 +1,32 @@
+# Environment
+.env
+venv/
+__pycache__/
+*.pyc
+
+# Temp processing files
+temp/
+*.mp4
+*.mp3
+*.wav
+*.ass
+*.srt
+
+# Credentials (NEVER commit these)
+*.json
+!data/queue.json
+!data/processed_videos.json
+!data/analytics.json
+!package.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Fonts (downloaded at runtime)
+templates/fonts/*.ttf
+templates/fonts/*.otf

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT Shorts Automation — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🎬</span>
+                    <h1>YT Shorts Automation</h1>
+                </div>
+                <div class="header-meta">
+                    <span class="status-badge" id="statusBadge">
+                        <span class="status-dot"></span>
+                        Active
+                    </span>
+                    <span class="last-updated" id="lastUpdated">Last updated: —</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">📤</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalUploads">0</span>
+                    <span class="stat-label">Total Uploads</span>
+                </div>
+            </div>
+            <div class="stat-card stat-success">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalViews">0</span>
+                    <span class="stat-label">Total Views</span>
+                </div>
+            </div>
+            <div class="stat-card stat-warning">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalLikes">0</span>
+                    <span class="stat-label">Total Likes</span>
+                </div>
+            </div>
+            <div class="stat-card stat-info">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="queueSize">0</span>
+                    <span class="stat-label">In Queue</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clip Type Distribution -->
+        <section class="card chart-section">
+            <h2 class="card-title">📊 Clip Type Distribution</h2>
+            <div class="type-bars">
+                <div class="type-bar">
+                    <div class="type-label">
+                        <span class="type-dot type-viral"></span>
+                        Viral
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-viral" id="barViral" style="width: 0%"></div>
+                    </div>
+                    <span class="type-count" id="countViral">0</span>
+                </div>
+                <div class="type-bar">
+                    <div class="type-label">
+                        <span class="type-dot type-informative"></span>
+                        Informative
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-informative" id="barInformative" style="width: 0%"></div>
+                    </div>
+                    <span class="type-count" id="countInformative">0</span>
+                </div>
+                <div class="type-bar">
+                    <div class="type-label">
+                        <span class="type-dot type-mixed"></span>
+                        Mixed
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-mixed" id="barMixed" style="width: 0%"></div>
+                    </div>
+                    <span class="type-count" id="countMixed">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Uploads Table -->
+        <section class="card">
+            <h2 class="card-title">🕐 Recent Uploads</h2>
+            <div class="table-container">
+                <table class="uploads-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Scheduled</th>
+                            <th>Views</th>
+                            <th>Likes</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uploadsTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">No uploads yet. Process your first video!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Queue Status -->
+        <section class="card">
+            <h2 class="card-title">📋 Queue Status</h2>
+            <div class="queue-info">
+                <div class="queue-stat">
+                    <span class="queue-label">Pending</span>
+                    <span class="queue-value" id="queuePending">0</span>
+                </div>
+                <div class="queue-stat">
+                    <span class="queue-label">Uploaded</span>
+                    <span class="queue-value" id="queueUploaded">0</span>
+                </div>
+                <div class="queue-stat">
+                    <span class="queue-label">Failed</span>
+                    <span class="queue-value queue-failed" id="queueFailed">0</span>
+                </div>
+                <div class="queue-stat">
+                    <span class="queue-label">Est. Days Left</span>
+                    <span class="queue-value" id="queueDays">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>YT Shorts Automation • Powered by Gemini AI + FFmpeg + GitHub Actions</p>
+            <p class="footer-sub">All running for <strong>$0/month</strong> 🚀</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
