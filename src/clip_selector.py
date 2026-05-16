@@ -7,7 +7,8 @@ import json
 import re
 from dataclasses import dataclass
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types as genai_types
 
 from src.config import (
     GEMINI_API_KEY,
@@ -111,16 +112,16 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
     if not GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY env var is not set.")
 
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(GEMINI_MODEL)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = _build_prompt(transcript_text, video_duration)
 
     logger.info(f"Sending transcript to Gemini for clip selection ({len(transcript_text)} chars)...")
 
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.types.GenerationConfig(
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=genai_types.GenerateContentConfig(
             temperature=0.7,
             max_output_tokens=4096,
         ),

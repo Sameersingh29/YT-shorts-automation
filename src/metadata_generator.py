@@ -5,7 +5,8 @@ Metadata Generator — uses Gemini AI to create viral titles, descriptions, and 
 import json
 import re
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types as genai_types
 
 from src.config import (
     GEMINI_API_KEY,
@@ -40,8 +41,7 @@ def generate_metadata(
     if not GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY env var is not set.")
 
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(GEMINI_MODEL)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     topics = ", ".join(PODCAST_TOPICS)
 
@@ -75,9 +75,10 @@ Return ONLY the JSON object."""
 
     logger.info("Generating metadata with Gemini...")
 
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.types.GenerationConfig(
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=genai_types.GenerateContentConfig(
             temperature=0.8,
             max_output_tokens=1024,
         ),

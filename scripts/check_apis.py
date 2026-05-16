@@ -61,10 +61,12 @@ def check_gemini():
         return False
 
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content("Say 'API working' in exactly 2 words.")
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="Say 'API working' in exactly 2 words.",
+        )
         print(f"✓ Gemini API: WORKING (response: {response.text.strip()[:50]})")
         return True
     except Exception as e:
