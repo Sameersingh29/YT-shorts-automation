@@ -86,14 +86,19 @@ Return ONLY the JSON object."""
 
     raw = response.text.strip()
 
-    # Extract JSON
-    json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+    # Strip markdown code fences if present (```json ... ``` or ``` ... ```)
+    fence_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw)
+    if fence_match:
+        raw = fence_match.group(1).strip()
+
+    # Extract JSON object (from first '{' to matching '}')
+    json_match = re.search(r'\{', raw)
     if not json_match:
         logger.warning(f"Failed to parse metadata JSON, using fallback. Raw: {raw[:300]}")
         return _fallback_metadata(suggested_title, clip_summary, hook)
 
     try:
-        metadata = json.loads(json_match.group())
+        metadata = json.loads(raw[json_match.start():])
     except json.JSONDecodeError:
         logger.warning("JSON parse error for metadata, using fallback.")
         return _fallback_metadata(suggested_title, clip_summary, hook)

@@ -75,6 +75,8 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_CLIENT_SECRET_JSON: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           DRIVE_SOURCE_FOLDER_ID: ${{ secrets.DRIVE_SOURCE_FOLDER_ID }}
           DRIVE_QUEUE_FOLDER_ID: ${{ secrets.DRIVE_QUEUE_FOLDER_ID }}
         run: |

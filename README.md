@@ -6,7 +6,7 @@ Fully automated pipeline that converts long-form podcast videos into viral YouTu
 
 1. **Downloads** podcast videos from Google Drive
 2. **Transcribes** with word-level timestamps (faster-whisper)
-3. **AI-selects** the 10 best moments using Gemini (mix of viral + informative)
+3. **AI-selects** the best moments using Gemini (mix of viral + informative)
 4. **Processes** each clip: 9:16 split layout + Hormozi-style captions
 5. **Generates** thumbnails, titles, descriptions, and hashtags
 6. **Uploads** 2 clips/day to YouTube at 9 AM & 9 PM IST
@@ -16,7 +16,7 @@ Fully automated pipeline that converts long-form podcast videos into viral YouTu
 
 | Component | Service | Cost |
 |---|---|---|
-| AI | Gemini 2.0 Flash (free tier) | Free |
+| AI | Gemini 2.5 Flash (free tier) | Free |
 | Video Processing | FFmpeg | Free |
 | Transcription | faster-whisper | Free |
 | Hosting | GitHub Actions (2000 min/month) | Free |
@@ -40,10 +40,17 @@ pip install -r requirements.txt
 python scripts/setup_google_auth.py
 ```
 
-This interactive wizard will help you set up:
-- Google Cloud service account (for Drive access)
-- YouTube OAuth2 (for video uploads)
-- Drive folder IDs (source & queue)
+This interactive wizard will guide you through:
+- **Service account** (for reading source videos from Google Drive)
+- **YouTube OAuth2** (for YouTube uploads *and* Drive queue uploads — see note below)
+- **Drive folder IDs** (source & queue)
+
+> **Important — Two-Account Setup:**
+> The pipeline uses two different auth methods for Drive:
+> - **Downloads** (source videos): service account credentials — the source folder must be shared with the service account email.
+> - **Uploads** (processed clips → queue): your YouTube OAuth credentials — the **queue folder must be shared (as Editor) with the Google account you use for YouTube OAuth**.
+>
+> If your YouTube account and your Google Drive account are different, open the queue folder in Drive and share it with your YouTube account's email address before running the pipeline.
 
 ### 3. Get a Gemini API Key
 
@@ -54,7 +61,11 @@ This interactive wizard will help you set up:
 ### 4. Verify Setup
 
 ```bash
+# Check all APIs and credentials
 python scripts/check_apis.py
+
+# Check Drive folder access for the OAuth account specifically
+python scripts/check_drive_access.py
 ```
 
 ### 5. Process Your First Video
@@ -93,8 +104,8 @@ The workflows will run automatically:
 │   ├── process_video.yml    # Video processing workflow
 │   └── upload_clip.yml      # Daily upload workflow
 ├── src/
-│   ├── config.py            # Configuration
-│   ├── drive_handler.py     # Google Drive operations
+│   ├── config.py            # Configuration & constants
+│   ├── drive_handler.py     # Google Drive (SA for reads, OAuth for writes)
 │   ├── transcriber.py       # Whisper transcription
 │   ├── clip_selector.py     # Gemini clip selection
 │   ├── video_processor.py   # FFmpeg processing
@@ -106,7 +117,10 @@ The workflows will run automatically:
 │   └── analytics.py         # Performance tracking
 ├── dashboard/               # GitHub Pages analytics
 ├── data/                    # Queue & analytics JSON
-├── scripts/                 # Setup helpers
+├── scripts/
+│   ├── setup_google_auth.py # Interactive auth wizard
+│   ├── check_apis.py        # Full API health check
+│   └── check_drive_access.py # Drive folder access diagnostic
 ├── process_video.py         # Main processing script
 └── upload_clip.py           # Main upload script
 ```
@@ -118,6 +132,20 @@ The workflows will run automatically:
 - **Captions**: Hormozi-style word-by-word pop animation
 - **Font**: Montserrat Extra Bold
 - **Duration**: 30-45 seconds per clip
+
+## Troubleshooting
+
+### "All videos in source folder have been processed"
+A previous run failed mid-pipeline and marked the video as done with 0 clips. The pipeline now automatically skips marking a video as processed if no clips were successfully queued — so failed runs are retried on the next execution. If you hit this with an older run, clear `data/processed_videos.json`.
+
+### "storageQuotaExceeded" on Drive upload
+Service accounts have no Drive storage quota and cannot upload to regular My Drive folders. The pipeline routes uploads through your YouTube OAuth credentials instead. Make sure the queue folder is shared (Editor) with the Google account used for YouTube OAuth.
+
+### "File not found" on queue folder (404)
+The OAuth account doesn't have access to the queue folder. Run `python scripts/check_drive_access.py` to identify which account the OAuth token belongs to, then share the queue folder with that account in Google Drive.
+
+### "invalid_scope" on Drive upload
+Your stored `YOUTUBE_REFRESH_TOKEN` was obtained without the Drive scope. Re-run `python scripts/setup_google_auth.py` (option 2) to get a new token that includes both YouTube and Drive scopes.
 
 ## License
 

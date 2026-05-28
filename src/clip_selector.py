@@ -123,24 +123,45 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
-            max_output_tokens=4096,
+            max_output_tokens=8192,
         ),
     )
 
     # Parse JSON from response
     raw_text = response.text.strip()
 
+    # Strip markdown code fences if present (```json ... ``` or ``` ... ```)
+    fence_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw_text)
+    if fence_match:
+        raw_text = fence_match.group(1).strip()
+
     # Try to extract JSON array from the response
-    json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
+    json_match = re.search(r'\[', raw_text)
     if not json_match:
         logger.error(f"Failed to parse JSON from Gemini response: {raw_text[:500]}")
         raise ValueError("Gemini response did not contain a valid JSON array.")
 
+    # Extract from first '[' to end; handle truncated responses by trimming to last complete object
+    json_str = raw_text[json_match.start():]
     try:
-        clips_data = json.loads(json_match.group())
+        clips_data = json.loads(json_str)
     except json.JSONDecodeError as e:
-        logger.error(f"JSON parse error: {e}\nRaw: {raw_text[:500]}")
-        raise
+        logger.warning(f"Full JSON parse failed ({e}), attempting partial recovery...")
+        # Find the last complete object ending with '}' before any truncation
+        last_brace = json_str.rfind('},')
+        if last_brace == -1:
+            last_brace = json_str.rfind('}')
+        if last_brace != -1:
+            partial = json_str[:last_brace + 1].rstrip(',') + ']'
+            try:
+                clips_data = json.loads(partial)
+                logger.info(f"Partial recovery succeeded: recovered {len(clips_data)} clips")
+            except json.JSONDecodeError as e2:
+                logger.error(f"Partial JSON recovery also failed: {e2}\nRaw: {raw_text[:500]}")
+                raise ValueError("Gemini response did not contain a valid JSON array.") from e2
+        else:
+            logger.error(f"JSON parse error: {e}\nRaw: {raw_text[:500]}")
+            raise ValueError("Gemini response did not contain a valid JSON array.") from e
 
     # Convert to ClipCandidate objects
     candidates = []

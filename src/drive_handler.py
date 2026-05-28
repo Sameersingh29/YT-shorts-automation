@@ -1,6 +1,13 @@
 """
 Google Drive Handler — download source videos & upload processed clips.
-Uses a service account for authentication.
+
+Authentication strategy:
+  - Downloads: service account (shared folder access, no quota needed for reads)
+  - Uploads:   YouTube OAuth2 credentials (real user account with Drive storage quota)
+
+Service accounts cannot upload to regular "My Drive" folders because they have
+no storage quota of their own (Google limitation). Reusing the existing YouTube
+OAuth credentials avoids needing a separate auth flow.
 """
 
 import io
@@ -11,11 +18,15 @@ from pathlib import Path
 from typing import Optional
 
 from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from src.config import (
     GOOGLE_SERVICE_ACCOUNT_JSON,
+    YOUTUBE_CLIENT_SECRET_JSON,
+    YOUTUBE_REFRESH_TOKEN,
     DRIVE_SOURCE_FOLDER_ID,
     DRIVE_QUEUE_FOLDER_ID,
     get_logger,
@@ -38,8 +49,54 @@ def _get_credentials():
 
 
 def get_drive_service():
-    """Return an authenticated Google Drive API service."""
+    """Return an authenticated Google Drive API service (service account — for reads)."""
     creds = _get_credentials()
+    return build("drive", "v3", credentials=creds)
+
+
+def _get_oauth_credentials() -> Credentials:
+    """
+    Build OAuth2 credentials from stored YouTube client secret + refresh token.
+    These are real user credentials with Drive storage quota, used for uploads.
+    """
+    if not YOUTUBE_CLIENT_SECRET_JSON:
+        raise ValueError(
+            "YOUTUBE_CLIENT_SECRET_JSON env var is not set. "
+            "Run scripts/setup_youtube_auth.py first."
+        )
+    if not YOUTUBE_REFRESH_TOKEN:
+        raise ValueError(
+            "YOUTUBE_REFRESH_TOKEN env var is not set. "
+            "Run scripts/setup_youtube_auth.py first."
+        )
+
+    client_config = json.loads(base64.b64decode(YOUTUBE_CLIENT_SECRET_JSON))
+    if "installed" in client_config:
+        client_info = client_config["installed"]
+    elif "web" in client_config:
+        client_info = client_config["web"]
+    else:
+        client_info = client_config
+
+    creds = Credentials(
+        token=None,
+        refresh_token=YOUTUBE_REFRESH_TOKEN,
+        token_uri=client_info.get("token_uri", "https://oauth2.googleapis.com/token"),
+        client_id=client_info["client_id"],
+        client_secret=client_info["client_secret"],
+        scopes=[
+            "https://www.googleapis.com/auth/youtube.upload",
+            "https://www.googleapis.com/auth/youtube",
+            "https://www.googleapis.com/auth/drive",
+        ],
+    )
+    creds.refresh(Request())
+    return creds
+
+
+def get_drive_service_oauth():
+    """Return a Drive API service authenticated as the real user (for uploads)."""
+    creds = _get_oauth_credentials()
     return build("drive", "v3", credentials=creds)
 
 
@@ -99,7 +156,9 @@ def upload_file(
     mime_type: Optional[str] = None,
 ) -> str:
     """
-    Upload a file to a Google Drive folder.
+    Upload a file to a Google Drive folder using OAuth2 user credentials.
+    Service accounts cannot upload to regular My Drive folders (no storage quota),
+    so we use the YouTube OAuth credentials which have real Drive quota.
     Returns the uploaded file's Drive ID.
     """
     folder = folder_id or DRIVE_QUEUE_FOLDER_ID
@@ -117,7 +176,8 @@ def upload_file(
         }
         mime_type = mime_map.get(suffix, "application/octet-stream")
 
-    service = get_drive_service()
+    # Use OAuth credentials (real user account) — service accounts lack Drive quota
+    service = get_drive_service_oauth()
     file_metadata = {
         "name": local_path.name,
         "parents": [folder],
@@ -128,6 +188,7 @@ def upload_file(
         body=file_metadata,
         media_body=media,
         fields="id",
+        supportsAllDrives=True,
     ).execute()
 
     file_id = file.get("id")
@@ -136,8 +197,9 @@ def upload_file(
 
 
 def create_folder(name: str, parent_folder_id: Optional[str] = None) -> str:
-    """Create a folder in Google Drive. Returns the folder ID."""
-    service = get_drive_service()
+    """Create a folder in Google Drive using OAuth credentials. Returns the folder ID."""
+    # Use OAuth credentials so the folder is created in the user's Drive
+    service = get_drive_service_oauth()
     metadata = {
         "name": name,
         "mimeType": "application/vnd.google-apps.folder",

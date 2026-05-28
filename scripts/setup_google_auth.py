@@ -64,7 +64,7 @@ def setup_youtube_oauth():
 
     # Run OAuth2 flow
     print("\nOpening browser for authorization...")
-    print("(Allow access to your YouTube channel when prompted)\n")
+    print("(Allow access to your YouTube channel AND Google Drive when prompted)\n")
 
     try:
         from google_auth_oauthlib.flow import InstalledAppFlow
@@ -74,6 +74,7 @@ def setup_youtube_oauth():
             scopes=[
                 "https://www.googleapis.com/auth/youtube.upload",
                 "https://www.googleapis.com/auth/youtube",
+                "https://www.googleapis.com/auth/drive",  # needed for Drive uploads
             ],
         )
         credentials = flow.run_local_server(port=8080, prompt="consent")

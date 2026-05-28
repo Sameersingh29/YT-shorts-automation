@@ -203,8 +203,16 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
             logger.error(f"✗ Failed to process clip #{clip.clip_number}: {e}")
             continue
 
-    # Mark video as processed
-    mark_video_processed(video_drive_id, video_name, successful_clips)
+    # Only mark as processed if at least one clip succeeded.
+    # If all clips failed (e.g. API/upload errors), leave the video unprocessed
+    # so the next run can retry rather than silently skipping it.
+    if successful_clips > 0:
+        mark_video_processed(video_drive_id, video_name, successful_clips)
+    else:
+        logger.warning(
+            "No clips were successfully queued — NOT marking video as processed "
+            "so it can be retried on the next run."
+        )
 
     # Cleanup temp files
     logger.info("Cleaning up temporary files...")
