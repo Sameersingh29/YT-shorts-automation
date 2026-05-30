@@ -23,6 +23,8 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write   # needed to push analytics/queue updates back to repo
 
     steps:
       - name: Checkout repository

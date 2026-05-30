@@ -21,6 +21,8 @@ jobs:
   process:
     runs-on: ubuntu-latest
     timeout-minutes: 120  # 2 hour max for long videos
+    permissions:
+      contents: write   # needed to push queue/processed_videos updates back to repo
 
     steps:
       - name: Checkout repository
