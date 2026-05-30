@@ -37,8 +37,10 @@
       ],
       "hook": "What does a slave want?",
       "summary": "A philosopher's surprising take on what a slave truly desires, challenging common assumptions about freedom.",
-      "status": "pending",
-      "created_at": "2026-05-24T12:51:56.025252+00:00"
+      "status": "uploaded",
+      "created_at": "2026-05-24T12:51:56.025252+00:00",
+      "youtube_video_id": "7IMjwzfzuJo",
+      "uploaded_at": "2026-05-30T14:08:41.554431+00:00"
     },
     {
       "clip_id": "1RrbxRH1_02_61c347",
@@ -121,5 +123,5 @@
       "created_at": "2026-05-24T12:52:30.785134+00:00"
     }
   ],
-  "last_updated": "2026-05-24T12:52:30.785134+00:00"
+  "last_updated": "2026-05-30T14:08:41.554489+00:00"
 }
