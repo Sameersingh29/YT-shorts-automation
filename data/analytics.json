@@ -1,1 +1,41 @@
-{"uploads": [], "last_updated": ""}
+{
+  "uploads": [
+    {
+      "clip_id": "1RrbxRH1_01_a7c770",
+      "youtube_video_id": "7IMjwzfzuJo",
+      "title": "What Does A SLAVE REALLY Want? \ud83e\udd2f (Not what you think!)",
+      "source_video": "Ankur_Warikoo_Raj_Shamani.mp4",
+      "clip_type": "viral",
+      "scheduled_time": "2026-05-30T15:30:00.000Z",
+      "uploaded_at": "2026-05-30T14:08:41.554902+00:00",
+      "views": 0,
+      "likes": 0,
+      "comments": 0
+    },
+    {
+      "clip_id": "1RrbxRH1_02_61c347",
+      "youtube_video_id": "Mf_xJxFm8wA",
+      "title": "Why Gen Z is So IMPATIENT \ud83e\udd2f (On-Demand Generation)",
+      "source_video": "Ankur_Warikoo_Raj_Shamani.mp4",
+      "clip_type": "viral",
+      "scheduled_time": "2026-05-31T15:30:00.000Z",
+      "uploaded_at": "2026-05-30T16:34:58.367959+00:00",
+      "views": 0,
+      "likes": 0,
+      "comments": 0
+    },
+    {
+      "clip_id": "1RrbxRH1_03_6de7e9",
+      "youtube_video_id": "za--S0Sc_6M",
+      "title": "Focus is The New IQ! \ud83e\udde0 (Undivided Attention Wins)",
+      "source_video": "Ankur_Warikoo_Raj_Shamani.mp4",
+      "clip_type": "informative",
+      "scheduled_time": "2026-06-01T03:30:00.000Z",
+      "uploaded_at": "2026-05-31T07:10:25.835407+00:00",
+      "views": 0,
+      "likes": 0,
+      "comments": 0
+    }
+  ],
+  "last_updated": "2026-05-31T07:10:25.835417+00:00"
+}

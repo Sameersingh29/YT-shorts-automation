@@ -37,8 +37,10 @@
       ],
       "hook": "What does a slave want?",
       "summary": "A philosopher's surprising take on what a slave truly desires, challenging common assumptions about freedom.",
-      "status": "pending",
-      "created_at": "2026-05-24T12:51:56.025252+00:00"
+      "status": "uploaded",
+      "created_at": "2026-05-24T12:51:56.025252+00:00",
+      "youtube_video_id": "7IMjwzfzuJo",
+      "uploaded_at": "2026-05-30T14:08:41.554431+00:00"
     },
     {
       "clip_id": "1RrbxRH1_02_61c347",
@@ -77,8 +79,10 @@
       ],
       "hook": "Your generation is the on-demand generation.",
       "summary": "The speaker explains how being an 'on-demand generation' leads to impatience, expecting instant gratification in areas like love and growth.",
-      "status": "pending",
-      "created_at": "2026-05-24T12:52:12.676286+00:00"
+      "status": "uploaded",
+      "created_at": "2026-05-24T12:52:12.676286+00:00",
+      "youtube_video_id": "Mf_xJxFm8wA",
+      "uploaded_at": "2026-05-30T16:34:58.367318+00:00"
     },
     {
       "clip_id": "1RrbxRH1_03_6de7e9",
@@ -117,9 +121,11 @@
       ],
       "hook": "Undivided attention will take you so far",
       "summary": "The speaker emphasizes that undivided attention and focus are the new IQ in today's distracted world, leading to success.",
-      "status": "pending",
-      "created_at": "2026-05-24T12:52:30.785134+00:00"
+      "status": "uploaded",
+      "created_at": "2026-05-24T12:52:30.785134+00:00",
+      "youtube_video_id": "za--S0Sc_6M",
+      "uploaded_at": "2026-05-31T07:10:25.834869+00:00"
     }
   ],
-  "last_updated": "2026-05-24T12:52:30.785134+00:00"
+  "last_updated": "2026-05-31T07:10:25.834933+00:00"
 }
