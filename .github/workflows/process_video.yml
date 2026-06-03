@@ -45,9 +45,8 @@ jobs:
       - name: Download Montserrat ExtraBold font
         run: |
           mkdir -p templates/fonts
-          curl -L -o /tmp/Montserrat.zip "https://fonts.google.com/download?family=Montserrat"
-          unzip -o /tmp/Montserrat.zip -d /tmp/montserrat
-          find /tmp/montserrat -name "*ExtraBold*" -name "*.ttf" | head -1 | xargs -I {} cp {} templates/fonts/Montserrat-ExtraBold.ttf
+          curl -L -o templates/fonts/Montserrat-ExtraBold.ttf \
+            "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-ExtraBold.ttf"
           ls -la templates/fonts/
 
       - name: Check queue size
