@@ -42,6 +42,33 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify Gemini API access
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python - <<'EOF'
+          import os, sys
+          from google import genai
+          from google.genai import types as genai_types
+
+          key = os.environ.get("GEMINI_API_KEY", "")
+          if not key:
+              print("ERROR: GEMINI_API_KEY secret is not set.")
+              sys.exit(1)
+
+          client = genai.Client(api_key=key)
+          try:
+              resp = client.models.generate_content(
+                  model="gemini-2.5-flash",
+                  contents="Reply with the single word: ok",
+                  config=genai_types.GenerateContentConfig(max_output_tokens=5),
+              )
+              print(f"Gemini API OK — response: {resp.text.strip()!r}")
+          except Exception as e:
+              print(f"ERROR: Gemini API check failed: {e}")
+              sys.exit(1)
+          EOF
+
       - name: Download Montserrat ExtraBold font
         run: |
           mkdir -p templates/fonts
