@@ -123,7 +123,7 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
-            max_output_tokens=8192,
+            max_output_tokens=16000,
         ),
     )
 

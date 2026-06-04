@@ -122,11 +122,25 @@ def generate_thumbnail(
 
     # Extract a frame from the video
     frame_path = TEMP_DIR / "thumb_frame.jpg"
-    extract_frame(video_path, timestamp, frame_path)
+    try:
+        extract_frame(video_path, timestamp, frame_path)
+    except Exception as e:
+        logger.warning(f"Frame extraction failed ({e}), using black placeholder")
 
-    # Open and resize the frame
-    frame = Image.open(frame_path).convert("RGBA")
-    frame = frame.resize((THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), Image.LANCZOS)
+    # Validate the extracted frame before opening (ffmpeg can exit 0 with a 0-byte file)
+    if not frame_path.exists() or frame_path.stat().st_size < 1024:
+        logger.warning(
+            f"Frame file missing or too small ({frame_path.stat().st_size if frame_path.exists() else 0} bytes). "
+            "Falling back to black placeholder."
+        )
+        frame = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (10, 10, 10, 255))
+    else:
+        try:
+            frame = Image.open(frame_path).convert("RGBA")
+            frame = frame.resize((THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), Image.LANCZOS)
+        except Exception as e:
+            logger.warning(f"Pillow could not open frame ({e}), using black placeholder")
+            frame = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (10, 10, 10, 255))
 
     # Create a slightly brightened version
     from PIL import ImageEnhance
