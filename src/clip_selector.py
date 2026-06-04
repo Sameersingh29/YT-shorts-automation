@@ -124,8 +124,33 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
             max_output_tokens=16000,
+            # Disable safety filters — political/geopolitical content in Hindi
+            # can trigger mid-response truncation with default safety settings.
+            safety_settings=[
+                genai_types.SafetySetting(
+                    category="HARM_CATEGORY_HARASSMENT",
+                    threshold="BLOCK_NONE",
+                ),
+                genai_types.SafetySetting(
+                    category="HARM_CATEGORY_HATE_SPEECH",
+                    threshold="BLOCK_NONE",
+                ),
+                genai_types.SafetySetting(
+                    category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold="BLOCK_NONE",
+                ),
+                genai_types.SafetySetting(
+                    category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold="BLOCK_NONE",
+                ),
+            ],
         ),
     )
+
+    # Log finish reason so we can diagnose any future truncation
+    if response.candidates:
+        finish_reason = response.candidates[0].finish_reason
+        logger.info(f"Gemini finish_reason: {finish_reason}")
 
     # Parse JSON from response
     raw_text = response.text.strip()
