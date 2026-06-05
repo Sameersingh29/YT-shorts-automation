@@ -122,6 +122,7 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int) -> str:
             temperature=0.7,
             max_output_tokens=8192,   # 2 clips = well under 2000 tokens; 8192 gives plenty of headroom
             safety_settings=safety_off,
+            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),  # disable thinking to save output tokens
         ),
     )
 

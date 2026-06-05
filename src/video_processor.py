@@ -174,8 +174,8 @@ def extract_frame(video_path: Path, timestamp: float, output_path: Path) -> Path
 
     cmd = [
         "ffmpeg", "-y",
+        "-i", str(video_path),   # -i BEFORE -ss: accurate seek (slower but no corrupt frames)
         "-ss", str(timestamp),
-        "-i", str(video_path),
         "-frames:v", "1",
         "-q:v", "2",
         str(output_path),
@@ -184,6 +184,13 @@ def extract_frame(video_path: Path, timestamp: float, output_path: Path) -> Path
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
     if result.returncode != 0:
         raise RuntimeError(f"Frame extraction failed: {result.stderr}")
+
+    # Validate the output — ffmpeg can exit 0 with a corrupt/incomplete frame
+    if not output_path.exists() or output_path.stat().st_size < 512:
+        raise RuntimeError(
+            f"Frame extraction produced invalid file "
+            f"({output_path.stat().st_size if output_path.exists() else 0} bytes)"
+        )
 
     logger.info(f"Extracted frame at {timestamp:.1f}s → {output_path.name}")
     return output_path

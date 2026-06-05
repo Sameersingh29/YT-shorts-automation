@@ -57,6 +57,13 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
     """
     source_folder = source_folder_id or DRIVE_SOURCE_FOLDER_ID
 
+    # Fail fast if the upload destination is not configured — no point processing
+    # an entire 2-hour podcast only to fail at the upload step.
+    if not DRIVE_QUEUE_FOLDER_ID:
+        raise ValueError(
+            "DRIVE_QUEUE_FOLDER_ID is not set. "
+            "Add it as a GitHub secret: Settings → Secrets → Actions → New secret."
+        )
     # Step 1: Find a video to process
     logger.info("=" * 60)
     logger.info("STEP 1: Finding source video")
