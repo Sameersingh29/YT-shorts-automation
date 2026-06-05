@@ -84,9 +84,11 @@ SCHEDULE_TIMES_IST = ["09:00", "21:00"]
 IST_UTC_OFFSET_HOURS = 5.5
 
 # ─── Whisper (Transcription) ─────────────────────────────
-WHISPER_MODEL = "base"
-WHISPER_DEVICE = "cpu"
-WHISPER_COMPUTE_TYPE = "int8"
+# Can be a model name ("base", "small") or a local directory path.
+# In CI, set WHISPER_MODEL=models/faster-whisper-base to use pre-downloaded files.
+WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base")
+WHISPER_DEVICE = os.environ.get("WHISPER_DEVICE", "cpu")
+WHISPER_COMPUTE_TYPE = os.environ.get("WHISPER_COMPUTE_TYPE", "int8")
 
 # ─── Thumbnail ────────────────────────────────────────────
 THUMBNAIL_WIDTH = 1280
