@@ -127,86 +127,93 @@ def generate_thumbnail(
     except Exception as e:
         logger.warning(f"Frame extraction failed ({e}), using black placeholder")
 
-    # Validate the extracted frame before opening (ffmpeg can exit 0 with a 0-byte file)
-    if not frame_path.exists() or frame_path.stat().st_size < 1024:
-        logger.warning(
-            f"Frame file missing or too small ({frame_path.stat().st_size if frame_path.exists() else 0} bytes). "
-            "Falling back to black placeholder."
-        )
-        frame = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (10, 10, 10, 255))
-    else:
-        try:
-            frame = Image.open(frame_path).convert("RGBA")
-            frame = frame.resize((THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), Image.LANCZOS)
-        except Exception as e:
-            logger.warning(f"Pillow could not open frame ({e}), using black placeholder")
+    # Wrap the entire compositing pipeline — any Pillow failure falls back to
+    # a plain dark thumbnail so the clip still gets uploaded.
+    try:
+        # Load frame — validate size first (ffmpeg can exit 0 with tiny/corrupt files)
+        if not frame_path.exists() or frame_path.stat().st_size < 1024:
+            logger.warning(
+                f"Frame file missing or too small "
+                f"({frame_path.stat().st_size if frame_path.exists() else 0} bytes). "
+                "Falling back to black placeholder."
+            )
             frame = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (10, 10, 10, 255))
+        else:
+            try:
+                frame = Image.open(frame_path).convert("RGBA")
+                frame = frame.resize((THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), Image.LANCZOS)
+            except Exception as e:
+                logger.warning(f"Pillow could not open frame ({e}), using black placeholder")
+                frame = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (10, 10, 10, 255))
 
-    # Create a slightly brightened version
-    from PIL import ImageEnhance
-    enhancer = ImageEnhance.Contrast(frame)
-    frame = enhancer.enhance(1.3)
-    enhancer = ImageEnhance.Color(frame)
-    frame = enhancer.enhance(1.2)
+        # Enhance — force back to RGBA after each step because some Pillow
+        # versions lose the alpha channel during enhancement.
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Contrast(frame)
+        frame = enhancer.enhance(1.3).convert("RGBA")
+        enhancer = ImageEnhance.Color(frame)
+        frame = enhancer.enhance(1.2).convert("RGBA")
 
-    # Create gradient overlay
-    gradient = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (0, 0, 0, 0))
-    draw_gradient = ImageDraw.Draw(gradient)
+        # Create gradient overlay
+        gradient = Image.new("RGBA", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (0, 0, 0, 0))
+        draw_gradient = ImageDraw.Draw(gradient)
 
-    # Bottom gradient (dark for text readability)
-    for y in range(THUMBNAIL_HEIGHT // 2, THUMBNAIL_HEIGHT):
-        progress = (y - THUMBNAIL_HEIGHT // 2) / (THUMBNAIL_HEIGHT // 2)
-        alpha = int(200 * progress)
-        draw_gradient.line(
-            [(0, y), (THUMBNAIL_WIDTH, y)],
-            fill=(0, 0, 0, alpha),
-        )
+        # Bottom gradient (dark for text readability)
+        for y in range(THUMBNAIL_HEIGHT // 2, THUMBNAIL_HEIGHT):
+            progress = (y - THUMBNAIL_HEIGHT // 2) / (THUMBNAIL_HEIGHT // 2)
+            alpha = int(200 * progress)
+            draw_gradient.line([(0, y), (THUMBNAIL_WIDTH, y)], fill=(0, 0, 0, alpha))
 
-    # Top gradient (subtle dark for hook text)
-    for y in range(THUMBNAIL_HEIGHT // 4):
-        progress = 1 - (y / (THUMBNAIL_HEIGHT // 4))
-        alpha = int(120 * progress)
-        draw_gradient.line(
-            [(0, y), (THUMBNAIL_WIDTH, y)],
-            fill=(0, 0, 0, alpha),
-        )
+        # Top gradient (subtle dark for hook text)
+        for y in range(THUMBNAIL_HEIGHT // 4):
+            progress = 1 - (y / (THUMBNAIL_HEIGHT // 4))
+            alpha = int(120 * progress)
+            draw_gradient.line([(0, y), (THUMBNAIL_WIDTH, y)], fill=(0, 0, 0, alpha))
 
-    # Composite frame + gradient
-    if frame.mode != "RGBA":
-        frame = frame.convert("RGBA")
-    thumb = Image.alpha_composite(frame, gradient)
+        # Composite frame + gradient (both must be RGBA)
+        thumb = Image.alpha_composite(frame, gradient)
 
-    # Draw text
-    draw = ImageDraw.Draw(thumb)
+        # Draw text
+        draw = ImageDraw.Draw(thumb)
 
-    # Title text (bottom center)
-    title_font = _get_font(56)
-    title_lines = _wrap_text(title.upper(), title_font, THUMBNAIL_WIDTH - 80)
+        title_font = _get_font(56)
+        title_lines = _wrap_text(title.upper(), title_font, THUMBNAIL_WIDTH - 80)
 
-    # Position title from bottom
-    line_height = 70
-    total_text_height = len(title_lines) * line_height
-    y_start = THUMBNAIL_HEIGHT - total_text_height - 40
+        line_height = 70
+        total_text_height = len(title_lines) * line_height
+        y_start = THUMBNAIL_HEIGHT - total_text_height - 40
 
-    for i, line in enumerate(title_lines):
-        bbox = title_font.getbbox(line)
-        text_width = bbox[2] - bbox[0]
-        x = (THUMBNAIL_WIDTH - text_width) // 2
-        y = y_start + i * line_height
-        _draw_text_with_outline(draw, (x, y), line, title_font, TITLE_COLOR)
+        for i, line in enumerate(title_lines):
+            bbox = title_font.getbbox(line)
+            text_width = bbox[2] - bbox[0]
+            x = (THUMBNAIL_WIDTH - text_width) // 2
+            y = y_start + i * line_height
+            _draw_text_with_outline(draw, (x, y), line, title_font, TITLE_COLOR)
 
-    # Hook text (top left)
-    if hook:
-        hook_font = _get_font(32)
-        _draw_text_with_outline(
-            draw, (30, 25), hook.upper(), hook_font, ACCENT_COLOR, outline_width=2
-        )
+        if hook:
+            hook_font = _get_font(32)
+            _draw_text_with_outline(
+                draw, (30, 25), hook.upper(), hook_font, ACCENT_COLOR, outline_width=2
+            )
 
-    # Convert to RGB for JPEG and save
-    thumb_rgb = thumb.convert("RGB")
-    thumb_rgb.save(str(output_path), "JPEG", quality=90)
+        thumb_rgb = thumb.convert("RGB")
+        thumb_rgb.save(str(output_path), "JPEG", quality=90)
 
-    # Cleanup
+    except Exception as e:
+        # Last-resort fallback: plain dark JPEG with no image, just the title text
+        logger.warning(f"Thumbnail compositing failed ({e}), generating plain text thumbnail")
+        fallback = Image.new("RGB", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (15, 15, 20))
+        draw = ImageDraw.Draw(fallback)
+        font = _get_font(48)
+        lines = _wrap_text(title.upper(), font, THUMBNAIL_WIDTH - 80)
+        for i, line in enumerate(lines):
+            bbox = font.getbbox(line)
+            x = (THUMBNAIL_WIDTH - (bbox[2] - bbox[0])) // 2
+            y = THUMBNAIL_HEIGHT // 2 - len(lines) * 30 + i * 60
+            draw.text((x, y), line, font=font, fill=(255, 255, 255))
+        fallback.save(str(output_path), "JPEG", quality=90)
+
+    # Cleanup temp frame
     try:
         frame_path.unlink()
     except OSError:

@@ -120,7 +120,7 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int) -> str:
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
-            max_output_tokens=4096,   # 2 clips = well under 1000 tokens; 4096 is plenty
+            max_output_tokens=8192,   # 2 clips = well under 2000 tokens; 8192 gives plenty of headroom
             safety_settings=safety_off,
         ),
     )
