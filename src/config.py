@@ -84,11 +84,15 @@ SCHEDULE_TIMES_IST = ["09:00", "21:00"]
 IST_UTC_OFFSET_HOURS = 5.5
 
 # ─── Whisper (Transcription) ─────────────────────────────
-# Can be a model name ("base", "small") or a local directory path.
-# In CI, set WHISPER_MODEL=models/faster-whisper-base to use pre-downloaded files.
+# WHISPER_MODEL can be a model name ("base") or a local directory path.
+# In CI, set WHISPER_MODEL=models/faster-whisper-base to skip HuggingFace entirely.
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base")
 WHISPER_DEVICE = os.environ.get("WHISPER_DEVICE", "cpu")
 WHISPER_COMPUTE_TYPE = os.environ.get("WHISPER_COMPUTE_TYPE", "int8")
+# Cap transcription to first N minutes to avoid CPU timeout on long podcasts.
+# Set to None (default) to transcribe the full video locally.
+_max_min = os.environ.get("WHISPER_MAX_MINUTES")
+WHISPER_MAX_MINUTES: float | None = float(_max_min) if _max_min else None
 
 # ─── Thumbnail ────────────────────────────────────────────
 THUMBNAIL_WIDTH = 1280

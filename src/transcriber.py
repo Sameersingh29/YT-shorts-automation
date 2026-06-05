@@ -12,6 +12,7 @@ from src.config import (
     WHISPER_MODEL,
     WHISPER_DEVICE,
     WHISPER_COMPUTE_TYPE,
+    WHISPER_MAX_MINUTES,
     get_logger,
 )
 
@@ -68,13 +69,15 @@ class Transcript:
         return " ".join(w.word.strip() for w in words)
 
 
-def extract_audio(video_path: Path, output_path: Path = None) -> Path:
+def extract_audio(video_path: Path, output_path: Path = None, max_seconds: int = None) -> Path:
     """
     Extract audio from a video file as mono 16kHz WAV (optimal for Whisper).
 
     Args:
         video_path: Path to the source video file.
         output_path: Optional output path. Defaults to temp directory.
+        max_seconds: If set, only extract this many seconds of audio (to cap
+                     transcription time on very long videos).
 
     Returns:
         Path to the extracted audio file.
@@ -91,10 +94,13 @@ def extract_audio(video_path: Path, output_path: Path = None) -> Path:
         "-acodec", "pcm_s16le",   # 16-bit PCM
         "-ar", "16000",           # 16kHz sample rate (Whisper optimal)
         "-ac", "1",               # Mono
-        str(output_path),
     ]
+    if max_seconds:
+        cmd += ["-t", str(max_seconds)]
+    cmd.append(str(output_path))
 
-    logger.info(f"Extracting audio from {video_path.name}...")
+    cap_info = f" (capped at {max_seconds}s)" if max_seconds else ""
+    logger.info(f"Extracting audio from {video_path.name}{cap_info}...")
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
@@ -122,8 +128,11 @@ def transcribe(video_path: Path) -> Transcript:
     """
     from faster_whisper import WhisperModel
 
-    # Step 1: Extract audio
-    audio_path = extract_audio(video_path)
+    # Step 1: Extract audio (capped to avoid CPU timeout on long podcasts)
+    max_seconds = int(WHISPER_MAX_MINUTES * 60) if WHISPER_MAX_MINUTES else None
+    if max_seconds:
+        logger.info(f"Audio will be capped at {WHISPER_MAX_MINUTES:.0f} min ({max_seconds}s) for transcription")
+    audio_path = extract_audio(video_path, max_seconds=max_seconds)
 
     # Step 2: Load Whisper model
     logger.info(f"Loading Whisper model '{WHISPER_MODEL}' on {WHISPER_DEVICE}...")

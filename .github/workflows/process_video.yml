@@ -42,22 +42,25 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      # ── Whisper model: download once via CDN blob URLs (no HF API, no 429s) ──
       - name: Cache Whisper model
         id: cache-whisper
         uses: actions/cache@v4
         with:
-          path: ~/.cache/huggingface/hub
-          key: whisper-model-faster-whisper-base-v1
+          path: models/faster-whisper-base
+          key: whisper-base-direct-v1
 
-      - name: Pre-download Whisper model (if not cached)
+      - name: Download Whisper model files via CDN (if not cached)
         if: steps.cache-whisper.outputs.cache-hit != 'true'
         run: |
-          python - <<'EOF'
-          from faster_whisper import WhisperModel
-          print("Downloading faster-whisper-base model...")
-          WhisperModel("base", device="cpu", compute_type="int8")
-          print("Model downloaded and cached.")
-          EOF
+          mkdir -p models/faster-whisper-base
+          BASE="https://huggingface.co/Systran/faster-whisper-base/resolve/main"
+          for f in config.json model.bin tokenizer.json vocabulary.json preprocessor_config.json; do
+            echo "Downloading $f..."
+            wget -q --show-progress "$BASE/$f" -O "models/faster-whisper-base/$f"
+          done
+          echo "Model files ready:"
+          ls -lh models/faster-whisper-base/
 
       - name: Verify Gemini API access
         env:
@@ -124,6 +127,11 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           DRIVE_SOURCE_FOLDER_ID: ${{ secrets.DRIVE_SOURCE_FOLDER_ID }}
           DRIVE_QUEUE_FOLDER_ID: ${{ secrets.DRIVE_QUEUE_FOLDER_ID }}
+          # Use the locally downloaded model — bypasses HuggingFace API entirely
+          WHISPER_MODEL: models/faster-whisper-base
+          HF_HUB_OFFLINE: "1"
+          # Cap transcription to first 45 min — enough to pick 10 clips, avoids CPU timeout
+          WHISPER_MAX_MINUTES: "45"
         run: |
           python process_video.py \
             ${{ inputs.video_id && format('--video-id {0}', inputs.video_id) || '' }} \
