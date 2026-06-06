@@ -42,25 +42,50 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # ── Whisper model: download once via CDN blob URLs (no HF API, no 429s) ──
+      # ── Whisper model: cache locally so HuggingFace Hub is never hit at runtime ──
       - name: Cache Whisper model
         id: cache-whisper
         uses: actions/cache@v4
         with:
           path: models/faster-whisper-base
-          key: whisper-base-direct-v1
+          # Bump the version suffix if you need to force a fresh download
+          key: whisper-faster-base-v3
 
-      - name: Download Whisper model files via CDN (if not cached)
+      - name: Download Whisper model (if not cached)
         if: steps.cache-whisper.outputs.cache-hit != 'true'
         run: |
           mkdir -p models/faster-whisper-base
-          BASE="https://huggingface.co/Systran/faster-whisper-base/resolve/main"
-          for f in config.json model.bin tokenizer.json vocabulary.json preprocessor_config.json; do
-            echo "Downloading $f..."
-            wget -q --show-progress "$BASE/$f" -O "models/faster-whisper-base/$f"
-          done
+
+          # huggingface-cli is installed as part of huggingface_hub (a faster-whisper dep).
+          # It handles XET blob storage, retries, and rate-limit back-off automatically,
+          # unlike raw wget which fails with 429 on unauthenticated CDN requests.
+          echo "Downloading Systran/faster-whisper-base via huggingface-cli..."
+          huggingface-cli download \
+            Systran/faster-whisper-base \
+            --local-dir models/faster-whisper-base \
+            --local-dir-use-symlinks False \
+            --quiet
+
           echo "Model files ready:"
           ls -lh models/faster-whisper-base/
+
+      - name: Validate Whisper model files
+        run: |
+          echo "Checking model files..."
+          for f in config.json tokenizer.json vocabulary.txt; do
+            if [ ! -f "models/faster-whisper-base/$f" ]; then
+              echo "ERROR: Missing model file: $f"
+              ls -la models/faster-whisper-base/ || true
+              exit 1
+            fi
+          done
+          # model.bin must be at least 140 MB
+          MODEL_SIZE=$(stat -c%s "models/faster-whisper-base/model.bin" 2>/dev/null || echo 0)
+          if [ "$MODEL_SIZE" -lt 140000000 ]; then
+            echo "ERROR: model.bin is too small ($MODEL_SIZE bytes) — download likely failed"
+            exit 1
+          fi
+          echo "All model files OK (model.bin: $(du -sh models/faster-whisper-base/model.bin | cut -f1))"
 
       - name: Verify Gemini API access
         env:
