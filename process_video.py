@@ -144,21 +144,27 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
 
     for i, (clip, clip_path) in enumerate(zip(clips, processed_paths)):
         try:
-            # Generate thumbnail
-            thumb_path = thumbs_dir / f"thumb_{clip.clip_number:02d}.jpg"
-            mid_time = (clip.end_time - clip.start_time) / 3  # 1/3 into clip
-            thumb_result = generate_thumbnail(
-                video_path=clip_path,
-                timestamp=mid_time,
-                title=clip.suggested_title,
-                output_path=thumb_path,
-                hook=clip.hook,
-            )
-            # thumb_result is None if thumbnail generation completely failed;
-            # use a stub path so the upload step can be skipped cleanly.
-            thumb_path = thumb_result if thumb_result is not None else None
+            # ── Thumbnail (non-fatal — clip is uploaded even without one) ──
+            thumb_path = None
+            try:
+                thumb_out = thumbs_dir / f"thumb_{clip.clip_number:02d}.jpg"
+                mid_time = (clip.end_time - clip.start_time) / 3
+                thumb_path = generate_thumbnail(
+                    video_path=clip_path,
+                    timestamp=mid_time,
+                    title=clip.suggested_title,
+                    output_path=thumb_out,
+                    hook=clip.hook,
+                )
+            except Exception as thumb_exc:
+                import traceback as _tb
+                logger.warning(
+                    f"Clip #{clip.clip_number}: thumbnail failed (non-fatal) — "
+                    f"{thumb_exc}\n{_tb.format_exc()}"
+                )
+                thumb_path = None
 
-            # Generate metadata
+            # ── Metadata ──
             transcript_snippet = transcript.get_text_in_range(
                 clip.start_time, clip.end_time
             )
@@ -170,18 +176,17 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
                 transcript_snippet=transcript_snippet,
             )
 
-            # Step 7: Upload processed clip + thumbnail to Drive queue
+            # ── Upload clip + optional thumbnail + metadata to Drive queue ──
             logger.info(f"Uploading clip #{clip.clip_number} to Drive queue...")
             clip_drive_id = upload_file(clip_path, DRIVE_QUEUE_FOLDER_ID)
             thumb_drive_id = upload_file(thumb_path, DRIVE_QUEUE_FOLDER_ID) if thumb_path else None
 
-            # Save metadata as JSON and upload
             meta_path = TEMP_DIR / f"meta_{clip.clip_number:02d}.json"
             with open(meta_path, "w") as f:
                 json.dump(meta, f, indent=2)
             meta_drive_id = upload_file(meta_path, DRIVE_QUEUE_FOLDER_ID)
 
-            # Add to queue
+            # ── Queue entry ──
             clip_id = f"{video_drive_id[:8]}_{clip.clip_number:02d}_{uuid.uuid4().hex[:6]}"
             add_clip_to_queue({
                 "clip_id": clip_id,
@@ -207,10 +212,15 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
             })
 
             successful_clips += 1
-            logger.info(f"✓ Clip #{clip.clip_number} queued: {meta['title']}")
+            thumb_status = f"thumb={'yes' if thumb_drive_id else 'no'}"
+            logger.info(f"✓ Clip #{clip.clip_number} queued ({thumb_status}): {meta['title']}")
 
         except Exception as e:
-            logger.error(f"✗ Failed to process clip #{clip.clip_number}: {e}")
+            import traceback as _tb
+            logger.error(
+                f"✗ Failed to process clip #{clip.clip_number}: {e}\n"
+                f"{_tb.format_exc()}"
+            )
             continue
 
     # Only mark as processed if at least one clip succeeded.
