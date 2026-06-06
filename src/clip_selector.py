@@ -34,6 +34,7 @@ NUM_CHUNKS = CLIPS_PER_VIDEO // CLIPS_PER_CHUNK   # e.g. 10 // 2 = 5
 
 # Use a non-thinking model for clip selection — thinking models (gemini-2.5-*)
 # consume thinking tokens against max_output_tokens, causing JSON truncation.
+# NOTE: Do NOT change this to gemini-2.5-flash — it will break JSON output.
 CLIP_SELECTOR_MODEL = "gemini-2.0-flash"
 
 
@@ -131,6 +132,10 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int, clips_wanted
             temperature=0.7,
             max_output_tokens=8192,
             safety_settings=safety_off,
+            # Disable thinking tokens — they consume max_output_tokens budget,
+            # causing the JSON array to be cut off mid-response. Only applies
+            # to thinking models (gemini-2.5-*); ignored for 2.0-flash.
+            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
         ),
     )
 

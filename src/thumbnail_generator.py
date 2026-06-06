@@ -118,6 +118,35 @@ def generate_thumbnail(
     Returns:
         Path to the generated thumbnail, or None on complete failure.
     """
+    import traceback as _tb  # ensure available even if top-level import fails
+
+    # Absolute safety net — generate_thumbnail must NEVER raise to its caller.
+    # Any exception that escapes the inner handlers is caught here and logged
+    # with a full traceback so we can diagnose the real root cause.
+    try:
+        return _generate_thumbnail_impl(
+            video_path=video_path,
+            timestamp=timestamp,
+            title=title,
+            output_path=output_path,
+            hook=hook,
+        )
+    except Exception as _top_exc:
+        logger.error(
+            f"generate_thumbnail: unhandled exception — {_top_exc}\n"
+            f"{_tb.format_exc()}"
+        )
+        return None
+
+
+def _generate_thumbnail_impl(
+    video_path: Path,
+    timestamp: float,
+    title: str,
+    output_path: Path,
+    hook: str = "",
+) -> Path | None:
+    """Internal implementation — called only from generate_thumbnail."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Helper: save a PIL image as JPEG, falling back to PNG if JPEG fails
