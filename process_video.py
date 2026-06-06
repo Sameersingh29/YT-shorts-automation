@@ -147,13 +147,16 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
             # Generate thumbnail
             thumb_path = thumbs_dir / f"thumb_{clip.clip_number:02d}.jpg"
             mid_time = (clip.end_time - clip.start_time) / 3  # 1/3 into clip
-            generate_thumbnail(
+            thumb_result = generate_thumbnail(
                 video_path=clip_path,
                 timestamp=mid_time,
                 title=clip.suggested_title,
                 output_path=thumb_path,
                 hook=clip.hook,
             )
+            # thumb_result is None if thumbnail generation completely failed;
+            # use a stub path so the upload step can be skipped cleanly.
+            thumb_path = thumb_result if thumb_result is not None else None
 
             # Generate metadata
             transcript_snippet = transcript.get_text_in_range(
@@ -170,7 +173,7 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
             # Step 7: Upload processed clip + thumbnail to Drive queue
             logger.info(f"Uploading clip #{clip.clip_number} to Drive queue...")
             clip_drive_id = upload_file(clip_path, DRIVE_QUEUE_FOLDER_ID)
-            thumb_drive_id = upload_file(thumb_path, DRIVE_QUEUE_FOLDER_ID)
+            thumb_drive_id = upload_file(thumb_path, DRIVE_QUEUE_FOLDER_ID) if thumb_path else None
 
             # Save metadata as JSON and upload
             meta_path = TEMP_DIR / f"meta_{clip.clip_number:02d}.json"

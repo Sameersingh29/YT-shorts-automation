@@ -32,6 +32,10 @@ logger = get_logger(__name__)
 CLIPS_PER_CHUNK = 2
 NUM_CHUNKS = CLIPS_PER_VIDEO // CLIPS_PER_CHUNK   # e.g. 10 // 2 = 5
 
+# Use a non-thinking model for clip selection — thinking models (gemini-2.5-*)
+# consume thinking tokens against max_output_tokens, causing JSON truncation.
+CLIP_SELECTOR_MODEL = "gemini-2.0-flash"
+
 
 @dataclass
 class ClipCandidate:
@@ -116,13 +120,12 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int) -> str:
     ]
 
     response = client.models.generate_content(
-        model=GEMINI_MODEL,
+        model=CLIP_SELECTOR_MODEL,
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
-            max_output_tokens=8192,   # 2 clips = well under 2000 tokens; 8192 gives plenty of headroom
+            max_output_tokens=8192,
             safety_settings=safety_off,
-            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),  # disable thinking to save output tokens
         ),
     )
 

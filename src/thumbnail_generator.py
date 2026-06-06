@@ -98,7 +98,7 @@ def generate_thumbnail(
     title: str,
     output_path: Path,
     hook: str = "",
-) -> Path:
+) -> Path | None:
     """
     Generate a YouTube Shorts thumbnail.
 
@@ -116,9 +116,21 @@ def generate_thumbnail(
         hook: Optional hook text for the top of thumbnail.
 
     Returns:
-        Path to the generated thumbnail.
+        Path to the generated thumbnail, or None on complete failure.
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Helper: save a PIL image as JPEG, falling back to PNG if JPEG fails
+    def _save_jpeg(img: "Image.Image", path: Path) -> Path:
+        """Save image as JPEG; if JPEG encoder is unavailable, save as PNG."""
+        try:
+            img.convert("RGB").save(str(path), "JPEG", quality=90)
+            return path
+        except Exception as e:
+            logger.warning(f"JPEG save failed ({e}), falling back to PNG")
+            png_path = path.with_suffix(".png")
+            img.convert("RGB").save(str(png_path), "PNG")
+            return png_path
 
     # Extract a frame from the video
     frame_path = TEMP_DIR / "thumb_frame.jpg"
@@ -127,8 +139,6 @@ def generate_thumbnail(
     except Exception as e:
         logger.warning(f"Frame extraction failed ({e}), using black placeholder")
 
-    # Wrap the entire compositing pipeline — any Pillow failure falls back to
-    # a plain dark thumbnail so the clip still gets uploaded.
     try:
         # Load frame — validate size first (ffmpeg can exit 0 with tiny/corrupt files)
         if not frame_path.exists() or frame_path.stat().st_size < 1024:
@@ -196,22 +206,30 @@ def generate_thumbnail(
                 draw, (30, 25), hook.upper(), hook_font, ACCENT_COLOR, outline_width=2
             )
 
-        thumb_rgb = thumb.convert("RGB")
-        thumb_rgb.save(str(output_path), "JPEG", quality=90)
+        saved_path = _save_jpeg(thumb, output_path)
 
     except Exception as e:
-        # Last-resort fallback: plain dark JPEG with no image, just the title text
+        # Last-resort fallback: plain dark image with just the title text
         logger.warning(f"Thumbnail compositing failed ({e}), generating plain text thumbnail")
-        fallback = Image.new("RGB", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (15, 15, 20))
-        draw = ImageDraw.Draw(fallback)
-        font = _get_font(48)
-        lines = _wrap_text(title.upper(), font, THUMBNAIL_WIDTH - 80)
-        for i, line in enumerate(lines):
-            bbox = font.getbbox(line)
-            x = (THUMBNAIL_WIDTH - (bbox[2] - bbox[0])) // 2
-            y = THUMBNAIL_HEIGHT // 2 - len(lines) * 30 + i * 60
-            draw.text((x, y), line, font=font, fill=(255, 255, 255))
-        fallback.save(str(output_path), "JPEG", quality=90)
+        try:
+            fallback = Image.new("RGB", (THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), (15, 15, 20))
+            draw = ImageDraw.Draw(fallback)
+            font = _get_font(48)
+            lines = _wrap_text(title.upper(), font, THUMBNAIL_WIDTH - 80)
+            for i, line in enumerate(lines):
+                bbox = font.getbbox(line)
+                x = (THUMBNAIL_WIDTH - (bbox[2] - bbox[0])) // 2
+                y = THUMBNAIL_HEIGHT // 2 - len(lines) * 30 + i * 60
+                draw.text((x, y), line, font=font, fill=(255, 255, 255))
+            saved_path = _save_jpeg(fallback, output_path)
+        except Exception as e2:
+            logger.error(f"Thumbnail generation completely failed ({e2}), skipping thumbnail")
+            # Cleanup temp frame
+            try:
+                frame_path.unlink()
+            except OSError:
+                pass
+            return None
 
     # Cleanup temp frame
     try:
@@ -219,6 +237,7 @@ def generate_thumbnail(
     except OSError:
         pass
 
-    file_size_kb = output_path.stat().st_size / 1024
-    logger.info(f"Thumbnail generated → {output_path.name} ({file_size_kb:.0f} KB)")
-    return output_path
+    file_size_kb = saved_path.stat().st_size / 1024
+    logger.info(f"Thumbnail generated → {saved_path.name} ({file_size_kb:.0f} KB)")
+    return saved_path
+

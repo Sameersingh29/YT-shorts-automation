@@ -37,7 +37,7 @@ jobs:
       - name: Install FFmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg libjpeg-dev libpng-dev
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
