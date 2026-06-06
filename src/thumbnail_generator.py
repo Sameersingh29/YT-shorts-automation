@@ -122,15 +122,21 @@ def generate_thumbnail(
 
     # Helper: save a PIL image as JPEG, falling back to PNG if JPEG fails
     def _save_jpeg(img: "Image.Image", path: Path) -> Path:
-        """Save image as JPEG; if JPEG encoder is unavailable, save as PNG."""
+        """Save image as JPEG; if JPEG encoder is unavailable, save as PNG.
+        Returns path on success, or None if all formats fail.
+        """
         try:
             img.convert("RGB").save(str(path), "JPEG", quality=90)
             return path
         except Exception as e:
             logger.warning(f"JPEG save failed ({e}), falling back to PNG")
-            png_path = path.with_suffix(".png")
-            img.convert("RGB").save(str(png_path), "PNG")
-            return png_path
+            try:
+                png_path = path.with_suffix(".png")
+                img.convert("RGB").save(str(png_path), "PNG")
+                return png_path
+            except Exception as e2:
+                logger.warning(f"PNG save also failed ({e2}), thumbnail save aborted")
+                return None
 
     # Extract a frame from the video
     frame_path = TEMP_DIR / "thumb_frame.jpg"
@@ -138,6 +144,8 @@ def generate_thumbnail(
         extract_frame(video_path, timestamp, frame_path)
     except Exception as e:
         logger.warning(f"Frame extraction failed ({e}), using black placeholder")
+
+    saved_path = None  # initialise before try blocks to prevent UnboundLocalError
 
     try:
         # Load frame — validate size first (ffmpeg can exit 0 with tiny/corrupt files)
@@ -207,6 +215,8 @@ def generate_thumbnail(
             )
 
         saved_path = _save_jpeg(thumb, output_path)
+        if saved_path is None:
+            raise RuntimeError("All image save attempts failed")
 
     except Exception as e:
         # Last-resort fallback: plain dark image with just the title text
@@ -224,20 +234,21 @@ def generate_thumbnail(
             saved_path = _save_jpeg(fallback, output_path)
         except Exception as e2:
             logger.error(f"Thumbnail generation completely failed ({e2}), skipping thumbnail")
-            # Cleanup temp frame
-            try:
-                frame_path.unlink()
-            except OSError:
-                pass
-            return None
+            saved_path = None
 
-    # Cleanup temp frame
+    # Cleanup temp frame regardless of outcome
     try:
         frame_path.unlink()
     except OSError:
         pass
 
-    file_size_kb = saved_path.stat().st_size / 1024
-    logger.info(f"Thumbnail generated → {saved_path.name} ({file_size_kb:.0f} KB)")
+    if saved_path is None:
+        return None
+
+    try:
+        file_size_kb = saved_path.stat().st_size / 1024
+        logger.info(f"Thumbnail generated → {saved_path.name} ({file_size_kb:.0f} KB)")
+    except Exception:
+        pass
     return saved_path
 

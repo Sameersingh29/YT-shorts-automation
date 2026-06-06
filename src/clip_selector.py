@@ -110,8 +110,13 @@ RESPOND WITH ONLY a JSON array of exactly {clips_wanted} objects. No markdown, n
 Timestamps must fall within minutes {chunk_start_min}-{chunk_end_min} of the video."""
 
 
-def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int) -> str:
-    """Call Gemini for one chunk. Returns raw response text."""
+def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int, clips_wanted: int = CLIPS_PER_CHUNK) -> str:
+    """Call Gemini for one chunk. Returns raw response text.
+
+    If the model returns MAX_TOKENS with a suspiciously short response
+    (safety-truncation pattern on political/geopolitical content), automatically
+    retries asking for 1 clip at a time to get completable responses.
+    """
     safety_off = [
         genai_types.SafetySetting(category="HARM_CATEGORY_HARASSMENT",       threshold="BLOCK_NONE"),
         genai_types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH",       threshold="BLOCK_NONE"),
@@ -133,10 +138,25 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int) -> str:
     finish_reason = "UNKNOWN"
     if response.candidates:
         finish_reason = str(response.candidates[0].finish_reason)
+    response_text = response.text or ""
     logger.info(f"Chunk {chunk_idx + 1}/{NUM_CHUNKS}: finish_reason={finish_reason}, "
-                f"response_len={len(response.text) if response.text else 0}")
+                f"response_len={len(response_text)}")
 
-    return response.text or ""
+    # Detect safety-truncation: MAX_TOKENS with a very short response (<800 chars)
+    # means the server cut the response mid-JSON due to content policy, not a real
+    # token limit. Retry asking for clips one-at-a-time to get completable responses.
+    if "MAX_TOKENS" in finish_reason and len(response_text) < 800 and clips_wanted > 1:
+        logger.warning(
+            f"Chunk {chunk_idx + 1}: short MAX_TOKENS response detected "
+            f"(likely safety truncation). Retrying 1 clip at a time..."
+        )
+        return _RETRY_SINGLE
+
+    return response_text
+
+
+# Sentinel returned by _call_gemini to request per-clip retries
+_RETRY_SINGLE = "__RETRY_SINGLE__"
 
 
 def _parse_clips_from_response(raw_text: str, chunk_idx: int) -> list[dict]:
@@ -290,9 +310,25 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
         prompt = _build_chunk_prompt(chunk_text, start_min, end_min, CLIPS_PER_CHUNK)
         try:
             raw_text = _call_gemini(client, prompt, i)
-            clip_dicts = _parse_clips_from_response(raw_text, i)
-            logger.info(f"Chunk {i + 1}: got {len(clip_dicts)} clip(s)")
-            all_raw_clips.extend(clip_dicts)
+
+            if raw_text == _RETRY_SINGLE:
+                # Safety-truncation detected: retry asking for 1 clip at a time
+                logger.info(f"Chunk {i + 1}: retrying with 1 clip per request...")
+                for attempt in range(CLIPS_PER_CHUNK):
+                    single_prompt = _build_chunk_prompt(
+                        chunk_text, start_min, end_min, clips_wanted=1
+                    )
+                    single_text = _call_gemini(client, single_prompt, i, clips_wanted=1)
+                    if single_text and single_text != _RETRY_SINGLE:
+                        clip_dicts = _parse_clips_from_response(single_text, i)
+                        logger.info(f"Chunk {i + 1} retry {attempt + 1}: got {len(clip_dicts)} clip(s)")
+                        all_raw_clips.extend(clip_dicts)
+                    else:
+                        logger.warning(f"Chunk {i + 1} retry {attempt + 1}: still truncated, skipping")
+            else:
+                clip_dicts = _parse_clips_from_response(raw_text, i)
+                logger.info(f"Chunk {i + 1}: got {len(clip_dicts)} clip(s)")
+                all_raw_clips.extend(clip_dicts)
         except Exception as e:
             logger.error(f"Chunk {i + 1} failed entirely: {e}")
             continue
