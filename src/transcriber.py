@@ -135,12 +135,31 @@ def transcribe(video_path: Path) -> Transcript:
     audio_path = extract_audio(video_path, max_seconds=max_seconds)
 
     # Step 2: Load Whisper model
+    # Retry up to 3 times with back-off in case HuggingFace Hub returns 429
+    # (rate limit on unauthenticated requests from shared CI runner IPs).
     logger.info(f"Loading Whisper model '{WHISPER_MODEL}' on {WHISPER_DEVICE}...")
-    model = WhisperModel(
-        WHISPER_MODEL,
-        device=WHISPER_DEVICE,
-        compute_type=WHISPER_COMPUTE_TYPE,
-    )
+    import time as _time
+    _last_exc = None
+    for _attempt in range(3):
+        try:
+            model = WhisperModel(
+                WHISPER_MODEL,
+                device=WHISPER_DEVICE,
+                compute_type=WHISPER_COMPUTE_TYPE,
+            )
+            break  # success
+        except Exception as _exc:
+            _last_exc = _exc
+            _wait = 30 * (_attempt + 1)  # 30s, 60s, 90s
+            logger.warning(
+                f"WhisperModel load attempt {_attempt + 1}/3 failed: {_exc}. "
+                f"Retrying in {_wait}s..."
+            )
+            _time.sleep(_wait)
+    else:
+        raise RuntimeError(
+            f"Failed to load Whisper model after 3 attempts. Last error: {_last_exc}"
+        )
 
     # Step 3: Transcribe with word timestamps
     logger.info("Transcribing audio (this may take a while for long videos)...")
