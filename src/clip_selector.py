@@ -20,6 +20,7 @@ from google.genai import types as genai_types
 
 from src.config import (
     GEMINI_API_KEY,
+    GEMINI_MODEL,
     MIN_CLIP_DURATION,
     MAX_CLIP_DURATION,
     CLIPS_PER_VIDEO,
@@ -32,10 +33,6 @@ logger = get_logger(__name__)
 # Number of chunks to split the transcript into.
 CLIPS_PER_CHUNK = 2
 NUM_CHUNKS = CLIPS_PER_VIDEO // CLIPS_PER_CHUNK   # e.g. 10 // 2 = 5
-
-# Use gemini-2.0-flash for clip selection — it supports structured output
-# with response_schema and doesn't burn thinking tokens on JSON output.
-CLIP_SELECTOR_MODEL = "gemini-2.0-flash"
 
 
 # ─── Pydantic schema for structured output ────────────────────────────────────
@@ -142,7 +139,7 @@ def _call_gemini_structured(
 
     try:
         response = client.models.generate_content(
-            model=CLIP_SELECTOR_MODEL,
+            model=GEMINI_MODEL,
             contents=prompt,
             config=genai_types.GenerateContentConfig(
                 temperature=0.4,          # Lower temp = more deterministic JSON
