@@ -62,7 +62,6 @@ jobs:
           hf download \
             Systran/faster-whisper-base \
             --local-dir models/faster-whisper-base \
-            --local-dir-use-symlinks False \
             --quiet
 
           echo "Model files ready:"
