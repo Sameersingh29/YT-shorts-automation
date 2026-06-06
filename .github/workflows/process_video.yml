@@ -56,11 +56,10 @@ jobs:
         run: |
           mkdir -p models/faster-whisper-base
 
-          # huggingface-cli is installed as part of huggingface_hub (a faster-whisper dep).
-          # It handles XET blob storage, retries, and rate-limit back-off automatically,
+          # The hf CLI handles XET blob storage, retries, and rate-limit back-off automatically,
           # unlike raw wget which fails with 429 on unauthenticated CDN requests.
-          echo "Downloading Systran/faster-whisper-base via huggingface-cli..."
-          huggingface-cli download \
+          echo "Downloading Systran/faster-whisper-base via hf..."
+          hf download \
             Systran/faster-whisper-base \
             --local-dir models/faster-whisper-base \
             --local-dir-use-symlinks False \
