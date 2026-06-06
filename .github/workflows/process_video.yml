@@ -105,13 +105,13 @@ jobs:
           # Test 1: Basic text generation
           try:
               resp = client.models.generate_content(
-                  model="gemini-2.0-flash",
+                  model="gemini-2.5-flash",
                   contents="Reply with the single word: ok",
                   config=genai_types.GenerateContentConfig(max_output_tokens=10),
               )
-              print(f"Gemini 2.0-flash OK — response: {resp.text.strip()!r}")
+              print(f"Gemini 2.5-flash OK — response: {resp.text.strip()!r}")
           except Exception as e:
-              print(f"ERROR: Gemini 2.0-flash check failed: {e}")
+              print(f"ERROR: Gemini 2.5-flash check failed: {e}")
               sys.exit(1)
 
           # Test 2: Structured output (the approach used by clip_selector.py)
@@ -121,7 +121,7 @@ jobs:
 
           try:
               resp2 = client.models.generate_content(
-                  model="gemini-2.0-flash",
+                  model="gemini-2.5-flash",
                   contents="Return a JSON with message='hello' and ok=true",
                   config=genai_types.GenerateContentConfig(
                       response_mime_type="application/json",
