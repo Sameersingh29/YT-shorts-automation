@@ -107,9 +107,9 @@ jobs:
               resp = client.models.generate_content(
                   model="gemini-2.5-flash",
                   contents="Reply with the single word: ok",
-                  config=genai_types.GenerateContentConfig(max_output_tokens=10),
+                  config=genai_types.GenerateContentConfig(max_output_tokens=100),
               )
-              print(f"Gemini 2.5-flash OK — response: {resp.text.strip()!r}")
+              print(f"Gemini 2.5-flash OK — response: {(resp.text or '').strip()!r}")
           except Exception as e:
               print(f"ERROR: Gemini 2.5-flash check failed: {e}")
               sys.exit(1)
@@ -126,7 +126,7 @@ jobs:
                   config=genai_types.GenerateContentConfig(
                       response_mime_type="application/json",
                       response_schema=TestOut,
-                      max_output_tokens=50,
+                      max_output_tokens=1024,
                   ),
               )
               parsed = resp2.parsed
