@@ -80,11 +80,18 @@ Return ONLY the JSON object."""
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.8,
-            max_output_tokens=1024,
+            max_output_tokens=2048,
+            # Disable thinking tokens to prevent budget exhaustion on gemini-2.5-*
+            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
         ),
     )
 
-    raw = response.text.strip()
+    # Safely extract text — .text raises ValueError on blocked/truncated responses
+    try:
+        raw = (response.text or "").strip()
+    except (ValueError, AttributeError):
+        logger.warning("Metadata response was blocked or truncated, using fallback.")
+        return _fallback_metadata(suggested_title, clip_summary, hook)
 
     # Strip markdown code fences if present (```json ... ``` or ``` ... ```)
     fence_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw)

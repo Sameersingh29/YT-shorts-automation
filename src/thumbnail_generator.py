@@ -168,7 +168,9 @@ def _generate_thumbnail_impl(
                 return None
 
     # Extract a frame from the video
-    frame_path = TEMP_DIR / "thumb_frame.jpg"
+    # Use PNG instead of JPEG: Pillow wheels on Ubuntu may lack the JPEG codec,
+    # causing Image.open() to raise "unknown file format" on .jpg frames.
+    frame_path = TEMP_DIR / f"thumb_frame_{output_path.stem}.png"
     try:
         extract_frame(video_path, timestamp, frame_path)
     except Exception as e:
@@ -267,7 +269,8 @@ def _generate_thumbnail_impl(
 
     # Cleanup temp frame regardless of outcome
     try:
-        frame_path.unlink()
+        if frame_path.exists():
+            frame_path.unlink()
     except OSError:
         pass
 

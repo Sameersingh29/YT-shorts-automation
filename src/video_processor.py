@@ -201,7 +201,7 @@ def process_all_clips(
     clips: list,
     transcript: Transcript,
     output_dir: Path,
-) -> list[Path]:
+) -> list[tuple]:
     """
     Process all selected clips from a source video.
 
@@ -212,10 +212,12 @@ def process_all_clips(
         output_dir: Directory to save processed clips.
 
     Returns:
-        List of paths to processed clip MP4s.
+        List of (ClipCandidate, Path) tuples for successfully processed clips.
+        Clips that fail are excluded — so iterate over the returned pairs directly
+        rather than zipping with the original clips list (which would misalign indices).
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    processed = []
+    processed = []  # list of (clip, output_path) tuples
 
     for clip in clips:
         # Get word timestamps for this clip's time range
@@ -240,7 +242,7 @@ def process_all_clips(
                 extra_keywords=clip.key_words,
                 clip_number=clip.clip_number,
             )
-            processed.append(result)
+            processed.append((clip, result))
         except Exception as e:
             logger.error(f"Failed to process clip #{clip.clip_number}: {e}")
             continue

@@ -130,7 +130,7 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
     logger.info("=" * 60)
 
     clips_dir = TEMP_DIR / "clips"
-    processed_paths = process_all_clips(local_video, clips, transcript, clips_dir)
+    processed_pairs = process_all_clips(local_video, clips, transcript, clips_dir)
 
     # Step 6: Generate thumbnails and metadata for each clip
     logger.info("=" * 60)
@@ -142,7 +142,7 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
 
     successful_clips = 0
 
-    for i, (clip, clip_path) in enumerate(zip(clips, processed_paths)):
+    for clip, clip_path in processed_pairs:
         try:
             # ── Thumbnail (non-fatal — clip is uploaded even without one) ──
             thumb_path = None
@@ -219,7 +219,8 @@ def process_video(video_drive_id: str = None, source_folder_id: str = None) -> i
             import traceback as _tb
             logger.error(
                 f"✗ Failed to process clip #{clip.clip_number}: {e}\n"
-                f"{_tb.format_exc()}"
+                f"{_tb.format_exc()}",
+                exc_info=False,  # format_exc() already captures the full traceback
             )
             continue
 

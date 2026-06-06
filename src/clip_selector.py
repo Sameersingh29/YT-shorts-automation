@@ -130,7 +130,7 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int, clips_wanted
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
-            max_output_tokens=8192,
+            max_output_tokens=16384,  # Increased to avoid legitimate truncation
             safety_settings=safety_off,
             # Disable thinking tokens — they consume max_output_tokens budget,
             # causing the JSON array to be cut off mid-response. Only applies
@@ -143,17 +143,34 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int, clips_wanted
     finish_reason = "UNKNOWN"
     if response.candidates:
         finish_reason = str(response.candidates[0].finish_reason)
-    response_text = response.text or ""
+
+    # Safely extract response text — .text can raise ValueError on blocked/truncated
+    # responses, so we pull from candidate parts directly as a fallback.
+    response_text = ""
+    try:
+        response_text = response.text or ""
+    except (ValueError, AttributeError):
+        try:
+            # Try extracting partial text from the candidate's content parts directly
+            candidate = response.candidates[0] if response.candidates else None
+            if candidate and candidate.content and candidate.content.parts:
+                response_text = "".join(
+                    p.text for p in candidate.content.parts if hasattr(p, "text") and p.text
+                )
+        except Exception:
+            response_text = ""
+
     logger.info(f"Chunk {chunk_idx + 1}/{NUM_CHUNKS}: finish_reason={finish_reason}, "
                 f"response_len={len(response_text)}")
 
-    # Detect safety-truncation: MAX_TOKENS with a very short response (<800 chars)
+    # Detect safety-truncation: MAX_TOKENS with a suspiciously short response
     # means the server cut the response mid-JSON due to content policy, not a real
-    # token limit. Retry asking for clips one-at-a-time to get completable responses.
-    if "MAX_TOKENS" in finish_reason and len(response_text) < 800 and clips_wanted > 1:
+    # token limit. Threshold raised to 1200 to catch all truncated-JSON cases.
+    # Retry by asking for 1 clip at a time to get completable responses.
+    if "MAX_TOKENS" in finish_reason and len(response_text) < 1200 and clips_wanted > 1:
         logger.warning(
             f"Chunk {chunk_idx + 1}: short MAX_TOKENS response detected "
-            f"(likely safety truncation). Retrying 1 clip at a time..."
+            f"(likely safety truncation, {len(response_text)} chars). Retrying 1 clip at a time..."
         )
         return _RETRY_SINGLE
 
