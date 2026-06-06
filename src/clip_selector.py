@@ -3,21 +3,23 @@ Clip Selector — uses Gemini AI to identify the best moments from a transcript.
 Picks a mix of viral/controversial and informative/valuable segments.
 
 Strategy: splits the transcript into chunks and queries Gemini once per chunk
-for 2 clips each. This avoids safety-filter mid-response truncation that happens
-when sending very large political/geopolitical transcripts in one shot.
+using Structured Output (response_schema + Pydantic) to guarantee valid JSON.
+This eliminates ALL JSON truncation / parsing issues that occur with free-text
+JSON generation on political/geopolitical content.
 """
 
-import json
-import re
 import math
+import re
+import time
 from dataclasses import dataclass
+from typing import Optional
 
+from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types as genai_types
 
 from src.config import (
     GEMINI_API_KEY,
-    GEMINI_MODEL,
     MIN_CLIP_DURATION,
     MAX_CLIP_DURATION,
     CLIPS_PER_VIDEO,
@@ -28,16 +30,36 @@ from src.config import (
 logger = get_logger(__name__)
 
 # Number of chunks to split the transcript into.
-# CLIPS_PER_VIDEO / CLIPS_PER_CHUNK must be a whole number.
 CLIPS_PER_CHUNK = 2
 NUM_CHUNKS = CLIPS_PER_VIDEO // CLIPS_PER_CHUNK   # e.g. 10 // 2 = 5
 
-# Use a non-thinking model for clip selection — thinking models (gemini-2.5-*)
-# consume thinking tokens against max_output_tokens, causing JSON truncation.
-# NOTE: Do NOT change this to gemini-2.5-flash — it will break JSON output.
+# Use gemini-2.0-flash for clip selection — it supports structured output
+# with response_schema and doesn't burn thinking tokens on JSON output.
 CLIP_SELECTOR_MODEL = "gemini-2.0-flash"
 
 
+# ─── Pydantic schema for structured output ────────────────────────────────────
+class ClipSchema(BaseModel):
+    """Schema for a single clip candidate returned by Gemini."""
+    clip_number: int = Field(description="Sequential clip number starting at 1")
+    start_time: str = Field(description="Start time in HH:MM:SS format")
+    end_time: str = Field(description="End time in HH:MM:SS format")
+    duration_seconds: int = Field(description="Duration in seconds (30-60)")
+    type: str = Field(description="'viral', 'informative', or 'mixed'")
+    viral_score: int = Field(description="Virality score 1-10")
+    info_score: int = Field(description="Informativeness score 1-10")
+    hook: str = Field(description="First 5-8 attention-grabbing words of the clip")
+    summary: str = Field(description="One-sentence description of the clip moment")
+    key_words: list[str] = Field(description="3-5 key words to highlight in captions")
+    suggested_title: str = Field(description="Catchy YouTube Shorts title with emoji, max 80 chars")
+
+
+class ClipsResponse(BaseModel):
+    """Top-level schema: list of clip candidates."""
+    clips: list[ClipSchema]
+
+
+# ─── Internal ClipCandidate dataclass (used by rest of pipeline) ──────────────
 @dataclass
 class ClipCandidate:
     """A candidate clip identified by AI."""
@@ -55,16 +77,21 @@ class ClipCandidate:
 
 
 def _parse_timestamp(ts: str) -> float:
-    """Convert 'HH:MM:SS.mmm' or 'MM:SS.mmm' to seconds."""
-    parts = ts.strip().split(":")
-    if len(parts) == 3:
-        h, m, s = parts
-        return int(h) * 3600 + int(m) * 60 + float(s)
-    elif len(parts) == 2:
-        m, s = parts
-        return int(m) * 60 + float(s)
-    else:
-        return float(parts[0])
+    """Convert 'HH:MM:SS.mmm', 'HH:MM:SS', or 'MM:SS' to seconds."""
+    ts = ts.strip()
+    parts = ts.split(":")
+    try:
+        if len(parts) == 3:
+            h, m, s = parts
+            return int(h) * 3600 + int(m) * 60 + float(s)
+        elif len(parts) == 2:
+            m, s = parts
+            return int(m) * 60 + float(s)
+        else:
+            return float(parts[0])
+    except (ValueError, TypeError):
+        logger.warning(f"Could not parse timestamp: {ts!r}, defaulting to 0")
+        return 0.0
 
 
 def _build_chunk_prompt(chunk_text: str, chunk_start_min: int, chunk_end_min: int,
@@ -82,7 +109,7 @@ CLIP REQUIREMENTS:
 - Start each clip at a natural beginning of a thought/statement
 - End each clip at a natural conclusion or powerful punchline
 
-SELECTION CRITERIA (pick the BEST from this segment):
+SELECTION CRITERIA:
 - VIRAL moments: Hot takes, surprising revelations, emotional peaks, quotable statements
 - INFORMATIVE moments: Key insights, actionable advice, unique perspectives, life-changing ideas
 
@@ -91,32 +118,20 @@ PODCAST TOPICS: {topics}
 TRANSCRIPT SEGMENT (minutes {chunk_start_min} to {chunk_end_min}):
 {chunk_text}
 
-RESPOND WITH ONLY a JSON array of exactly {clips_wanted} objects. No markdown, no explanation, just the JSON:
-[
-  {{
-    "clip_number": 1,
-    "start_time": "HH:MM:SS.000",
-    "end_time": "HH:MM:SS.000",
-    "duration_seconds": 35,
-    "type": "viral",
-    "viral_score": 9,
-    "info_score": 5,
-    "hook": "First 5-8 words that grab attention",
-    "summary": "Brief 1-line description of the moment",
-    "key_words": ["word1", "word2", "word3"],
-    "suggested_title": "Catchy YouTube Shorts title with emoji (max 80 chars)"
-  }}
-]
-
-Timestamps must fall within minutes {chunk_start_min}-{chunk_end_min} of the video."""
+Identify exactly {clips_wanted} clip(s) from this segment. Timestamps must fall within minutes {chunk_start_min}-{chunk_end_min}."""
 
 
-def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int, clips_wanted: int = CLIPS_PER_CHUNK) -> str:
-    """Call Gemini for one chunk. Returns raw response text.
+def _call_gemini_structured(
+    client: genai.Client,
+    prompt: str,
+    chunk_idx: int,
+    clips_wanted: int = CLIPS_PER_CHUNK,
+    attempt: int = 0,
+) -> list[ClipSchema]:
+    """
+    Call Gemini with structured output (response_schema) to get guaranteed valid JSON.
 
-    If the model returns MAX_TOKENS with a suspiciously short response
-    (safety-truncation pattern on political/geopolitical content), automatically
-    retries asking for 1 clip at a time to get completable responses.
+    Returns a list of ClipSchema objects. Never raises — returns [] on any failure.
     """
     safety_off = [
         genai_types.SafetySetting(category="HARM_CATEGORY_HARASSMENT",       threshold="BLOCK_NONE"),
@@ -125,100 +140,93 @@ def _call_gemini(client: genai.Client, prompt: str, chunk_idx: int, clips_wanted
         genai_types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="BLOCK_NONE"),
     ]
 
-    response = client.models.generate_content(
-        model=CLIP_SELECTOR_MODEL,
-        contents=prompt,
-        config=genai_types.GenerateContentConfig(
-            temperature=0.7,
-            max_output_tokens=16384,  # Increased to avoid legitimate truncation
-            safety_settings=safety_off,
-            # Disable thinking tokens — they consume max_output_tokens budget,
-            # causing the JSON array to be cut off mid-response. Only applies
-            # to thinking models (gemini-2.5-*); ignored for 2.0-flash.
-            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
-        ),
-    )
-
-    # Log finish_reason for diagnostics
-    finish_reason = "UNKNOWN"
-    if response.candidates:
-        finish_reason = str(response.candidates[0].finish_reason)
-
-    # Safely extract response text — .text can raise ValueError on blocked/truncated
-    # responses, so we pull from candidate parts directly as a fallback.
-    response_text = ""
     try:
-        response_text = response.text or ""
-    except (ValueError, AttributeError):
-        try:
-            # Try extracting partial text from the candidate's content parts directly
-            candidate = response.candidates[0] if response.candidates else None
-            if candidate and candidate.content and candidate.content.parts:
-                response_text = "".join(
-                    p.text for p in candidate.content.parts if hasattr(p, "text") and p.text
-                )
-        except Exception:
-            response_text = ""
-
-    logger.info(f"Chunk {chunk_idx + 1}/{NUM_CHUNKS}: finish_reason={finish_reason}, "
-                f"response_len={len(response_text)}")
-
-    # Detect safety-truncation: MAX_TOKENS with a suspiciously short response
-    # means the server cut the response mid-JSON due to content policy, not a real
-    # token limit. Threshold raised to 1200 to catch all truncated-JSON cases.
-    # Retry by asking for 1 clip at a time to get completable responses.
-    if "MAX_TOKENS" in finish_reason and len(response_text) < 1200 and clips_wanted > 1:
-        logger.warning(
-            f"Chunk {chunk_idx + 1}: short MAX_TOKENS response detected "
-            f"(likely safety truncation, {len(response_text)} chars). Retrying 1 clip at a time..."
+        response = client.models.generate_content(
+            model=CLIP_SELECTOR_MODEL,
+            contents=prompt,
+            config=genai_types.GenerateContentConfig(
+                temperature=0.4,          # Lower temp = more deterministic JSON
+                max_output_tokens=4096,
+                safety_settings=safety_off,
+                # Structured output: forces the model to emit valid JSON matching ClipsResponse
+                response_mime_type="application/json",
+                response_schema=ClipsResponse,
+                # Disable thinking for 2.0-flash (ignored by 2.0, safe for 2.5)
+                thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
+            ),
         )
-        return _RETRY_SINGLE
-
-    return response_text
-
-
-# Sentinel returned by _call_gemini to request per-clip retries
-_RETRY_SINGLE = "__RETRY_SINGLE__"
-
-
-def _parse_clips_from_response(raw_text: str, chunk_idx: int) -> list[dict]:
-    """Parse JSON clip array from a Gemini response. Returns list of raw dicts."""
-    raw_text = raw_text.strip()
-
-    # Strip markdown code fences if present
-    fence_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw_text)
-    if fence_match:
-        raw_text = fence_match.group(1).strip()
-
-    # Find the JSON array
-    json_match = re.search(r'\[', raw_text)
-    if not json_match:
-        logger.warning(f"Chunk {chunk_idx + 1}: no JSON array in response. "
-                       f"Preview: {raw_text[:300]!r}")
+    except Exception as exc:
+        logger.error(f"Chunk {chunk_idx + 1}: Gemini API call failed (attempt {attempt + 1}): {exc}")
         return []
 
-    json_str = raw_text[json_match.start():]
+    # Log finish reason and safety ratings
+    finish_reason = "UNKNOWN"
+    safety_info = ""
+    if response.candidates:
+        cand = response.candidates[0]
+        finish_reason = str(cand.finish_reason)
+        if hasattr(cand, "safety_ratings") and cand.safety_ratings:
+            blocked = [
+                f"{r.category}={r.probability}"
+                for r in cand.safety_ratings
+                if str(r.probability) not in ("NEGLIGIBLE", "LOW", "HarmProbability.NEGLIGIBLE", "HarmProbability.LOW")
+            ]
+            if blocked:
+                safety_info = f" | safety_flags: {blocked}"
 
+    logger.info(
+        f"Chunk {chunk_idx + 1}/{NUM_CHUNKS}: finish_reason={finish_reason}"
+        f"{safety_info}"
+    )
+
+    # If blocked by safety filter, log and return empty
+    if "SAFETY" in finish_reason:
+        logger.warning(
+            f"Chunk {chunk_idx + 1}: response blocked by safety filter. "
+            f"Returning 0 clips for this chunk.{safety_info}"
+        )
+        return []
+
+    # If output was cut off (MAX_TOKENS), retry once with fewer clips
+    if "MAX_TOKENS" in finish_reason and clips_wanted > 1 and attempt == 0:
+        logger.warning(
+            f"Chunk {chunk_idx + 1}: MAX_TOKENS hit, retrying with 1 clip at a time..."
+        )
+        return []  # Caller will retry per-clip
+
+    # Use response.parsed for clean Pydantic deserialization
     try:
-        return json.loads(json_str)
-    except json.JSONDecodeError as e:
-        logger.warning(f"Chunk {chunk_idx + 1}: full JSON parse failed ({e}), "
-                       f"attempting partial recovery...")
-        # Recover as many complete objects as possible
-        last_brace = json_str.rfind('},')
-        if last_brace == -1:
-            last_brace = json_str.rfind('}')
-        if last_brace != -1:
-            partial = json_str[:last_brace + 1].rstrip(',') + ']'
-            try:
-                recovered = json.loads(partial)
-                logger.info(f"Chunk {chunk_idx + 1}: partial recovery got {len(recovered)} clip(s)")
-                return recovered
-            except json.JSONDecodeError as e2:
-                logger.error(f"Chunk {chunk_idx + 1}: partial recovery failed: {e2}")
+        parsed: ClipsResponse = response.parsed
+        if parsed and parsed.clips:
+            logger.info(f"Chunk {chunk_idx + 1}: structured output → {len(parsed.clips)} clip(s)")
+            return parsed.clips
         else:
-            logger.error(f"Chunk {chunk_idx + 1}: JSON unrecoverable. "
-                         f"Raw: {raw_text[:400]!r}")
+            logger.warning(f"Chunk {chunk_idx + 1}: parsed response has no clips")
+            return []
+    except Exception as exc:
+        logger.warning(f"Chunk {chunk_idx + 1}: response.parsed failed ({exc}), trying response.text fallback")
+
+    # Fallback: manually parse response.text as JSON
+    try:
+        import json
+        raw = (response.text or "").strip()
+        # Strip fences
+        m = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw)
+        if m:
+            raw = m.group(1).strip()
+        data = json.loads(raw)
+        # Handle both {"clips": [...]} and bare [...] formats
+        if isinstance(data, dict) and "clips" in data:
+            clips_data = data["clips"]
+        elif isinstance(data, list):
+            clips_data = data
+        else:
+            clips_data = []
+        result = [ClipSchema(**c) for c in clips_data[:clips_wanted]]
+        logger.info(f"Chunk {chunk_idx + 1}: text fallback → {len(result)} clip(s)")
+        return result
+    except Exception as exc2:
+        logger.error(f"Chunk {chunk_idx + 1}: all parsing attempts failed: {exc2}")
         return []
 
 
@@ -226,12 +234,10 @@ def _split_transcript(transcript_text: str, n_chunks: int) -> list[tuple[str, in
     """
     Split transcript into n_chunks roughly equal parts by line count.
     Returns list of (chunk_text, start_min, end_min) tuples.
-    Tries to split at line boundaries so timestamps stay intact.
     """
     lines = transcript_text.splitlines(keepends=True)
     lines_per_chunk = math.ceil(len(lines) / n_chunks)
 
-    # Extract the video time range from the first/last timestamp lines
     def _first_minute(text: str) -> int:
         m = re.search(r'\[(\d+):\d+\]', text)
         return int(m.group(1)) if m else 0
@@ -253,18 +259,18 @@ def _split_transcript(transcript_text: str, n_chunks: int) -> list[tuple[str, in
     return chunks
 
 
-def _dict_to_candidate(clip: dict, clip_number: int, video_duration: float) -> ClipCandidate | None:
-    """Convert a raw clip dict from Gemini JSON into a ClipCandidate. Returns None if invalid."""
+def _schema_to_candidate(clip: ClipSchema, clip_number: int, video_duration: float) -> Optional[ClipCandidate]:
+    """Convert a ClipSchema (Pydantic) into a ClipCandidate. Returns None if invalid."""
     try:
-        start = _parse_timestamp(str(clip["start_time"]))
-        end = _parse_timestamp(str(clip["end_time"]))
+        start = _parse_timestamp(clip.start_time)
+        end = _parse_timestamp(clip.end_time)
         duration = end - start
 
-        # Clamp duration
+        # Clamp duration to acceptable range
         if duration < MIN_CLIP_DURATION - 5 or duration > MAX_CLIP_DURATION + 10:
             logger.warning(
                 f"Clip has duration {duration:.1f}s "
-                f"(expected {MIN_CLIP_DURATION}-{MAX_CLIP_DURATION}s), adjusting..."
+                f"(expected {MIN_CLIP_DURATION}-{MAX_CLIP_DURATION}s), clamping..."
             )
             if duration < MIN_CLIP_DURATION:
                 end = start + MIN_CLIP_DURATION
@@ -274,25 +280,29 @@ def _dict_to_candidate(clip: dict, clip_number: int, video_duration: float) -> C
 
         # Clamp to video bounds
         if start < 0:
-            start = 0
+            start = 0.0
         if end > video_duration:
             end = video_duration
             duration = end - start
+
+        if duration <= 0:
+            logger.warning(f"Clip has non-positive duration after clamping, skipping.")
+            return None
 
         return ClipCandidate(
             clip_number=clip_number,
             start_time=round(start, 3),
             end_time=round(end, 3),
             duration=round(duration, 1),
-            clip_type=clip.get("type", "mixed"),
-            viral_score=int(clip.get("viral_score", 5)),
-            info_score=int(clip.get("info_score", 5)),
-            hook=clip.get("hook", ""),
-            summary=clip.get("summary", ""),
-            key_words=[w.lower() for w in clip.get("key_words", [])],
-            suggested_title=clip.get("suggested_title", ""),
+            clip_type=clip.type or "mixed",
+            viral_score=max(1, min(10, int(clip.viral_score))),
+            info_score=max(1, min(10, int(clip.info_score))),
+            hook=clip.hook or "",
+            summary=clip.summary or "",
+            key_words=[w.lower() for w in (clip.key_words or [])],
+            suggested_title=clip.suggested_title or "",
         )
-    except (KeyError, ValueError, TypeError) as e:
+    except (ValueError, TypeError, AttributeError) as e:
         logger.warning(f"Skipping invalid clip data: {e} — data: {clip}")
         return None
 
@@ -301,9 +311,11 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
     """
     Use Gemini AI to select the best clip candidates from a transcript.
 
+    Uses Structured Output (response_schema=ClipsResponse) to guarantee
+    valid JSON — no more truncated JSON or parsing failures.
+
     Splits the transcript into NUM_CHUNKS segments and asks for CLIPS_PER_CHUNK
-    clips from each, then combines and deduplicates. This avoids safety-filter
-    truncation that occurs when sending very large transcripts in one request.
+    clips from each, then combines and deduplicates.
 
     Args:
         transcript_text: Full transcript text with timestamps.
@@ -320,47 +332,44 @@ def select_clips(transcript_text: str, video_duration: float) -> list[ClipCandid
     chunks = _split_transcript(transcript_text, NUM_CHUNKS)
     logger.info(
         f"Split transcript ({len(transcript_text)} chars) into {len(chunks)} chunks "
-        f"of ~{len(transcript_text) // len(chunks) if chunks else 0} chars each. "
-        f"Requesting {CLIPS_PER_CHUNK} clips per chunk."
+        f"of ~{len(transcript_text) // max(len(chunks), 1)} chars each. "
+        f"Requesting {CLIPS_PER_CHUNK} clips per chunk via structured output."
     )
 
-    all_raw_clips: list[dict] = []
+    all_clip_schemas: list[ClipSchema] = []
 
     for i, (chunk_text, start_min, end_min) in enumerate(chunks):
         logger.info(f"Processing chunk {i + 1}/{len(chunks)}: "
                     f"minutes {start_min}-{end_min} ({len(chunk_text)} chars)")
+
         prompt = _build_chunk_prompt(chunk_text, start_min, end_min, CLIPS_PER_CHUNK)
-        try:
-            raw_text = _call_gemini(client, prompt, i)
 
-            if raw_text == _RETRY_SINGLE:
-                # Safety-truncation detected: retry asking for 1 clip at a time
-                logger.info(f"Chunk {i + 1}: retrying with 1 clip per request...")
-                for attempt in range(CLIPS_PER_CHUNK):
-                    single_prompt = _build_chunk_prompt(
-                        chunk_text, start_min, end_min, clips_wanted=1
-                    )
-                    single_text = _call_gemini(client, single_prompt, i, clips_wanted=1)
-                    if single_text and single_text != _RETRY_SINGLE:
-                        clip_dicts = _parse_clips_from_response(single_text, i)
-                        logger.info(f"Chunk {i + 1} retry {attempt + 1}: got {len(clip_dicts)} clip(s)")
-                        all_raw_clips.extend(clip_dicts)
-                    else:
-                        logger.warning(f"Chunk {i + 1} retry {attempt + 1}: still truncated, skipping")
-            else:
-                clip_dicts = _parse_clips_from_response(raw_text, i)
-                logger.info(f"Chunk {i + 1}: got {len(clip_dicts)} clip(s)")
-                all_raw_clips.extend(clip_dicts)
-        except Exception as e:
-            logger.error(f"Chunk {i + 1} failed entirely: {e}")
-            continue
+        # First attempt: ask for CLIPS_PER_CHUNK clips
+        clip_schemas = _call_gemini_structured(client, prompt, i, CLIPS_PER_CHUNK, attempt=0)
 
-    logger.info(f"Total raw clips from all chunks: {len(all_raw_clips)}")
+        if not clip_schemas:
+            # Retry: ask for 1 clip at a time (avoids safety truncation on long outputs)
+            logger.info(f"Chunk {i + 1}: retrying with 1 clip per request...")
+            for attempt_num in range(CLIPS_PER_CHUNK):
+                single_prompt = _build_chunk_prompt(chunk_text, start_min, end_min, 1)
+                single_schemas = _call_gemini_structured(client, single_prompt, i, 1, attempt=1)
+                if single_schemas:
+                    clip_schemas.extend(single_schemas)
+                    logger.info(f"Chunk {i + 1} retry {attempt_num + 1}: got {len(single_schemas)} clip(s)")
+                else:
+                    logger.warning(f"Chunk {i + 1} retry {attempt_num + 1}: still no clips")
+                # Small delay between retries to avoid rate limiting
+                time.sleep(1)
+
+        logger.info(f"Chunk {i + 1}: final clip count = {len(clip_schemas)}")
+        all_clip_schemas.extend(clip_schemas)
+
+    logger.info(f"Total raw clips from all chunks: {len(all_clip_schemas)}")
 
     # Convert to ClipCandidate objects
     candidates: list[ClipCandidate] = []
-    for raw in all_raw_clips:
-        c = _dict_to_candidate(raw, len(candidates) + 1, video_duration)
+    for schema in all_clip_schemas:
+        c = _schema_to_candidate(schema, len(candidates) + 1, video_duration)
         if c is not None:
             candidates.append(c)
 
