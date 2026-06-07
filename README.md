@@ -147,6 +147,13 @@ The OAuth account doesn't have access to the queue folder. Run `python scripts/c
 ### "invalid_scope" on Drive upload
 Your stored `YOUTUBE_REFRESH_TOKEN` was obtained without the Drive scope. Re-run `python scripts/setup_google_auth.py` (option 2) to get a new token that includes both YouTube and Drive scopes.
 
+### "invalid_grant: Token has been expired or revoked"
+Your `YOUTUBE_REFRESH_TOKEN` has expired. By default, Google puts new OAuth apps in "Testing" mode, which forces tokens to expire exactly 7 days after generation. To fix this permanently:
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/) -> APIs & Services -> OAuth consent screen.
+2. Click **Publish App** to change the status to "In production" (you don't actually need to pass verification for a personal app).
+3. Re-run `python scripts/setup_google_auth.py` (option 2) to generate a new token that will never expire.
+4. Update the `YOUTUBE_REFRESH_TOKEN` secret in GitHub.
+
 ## License
 
 MIT
