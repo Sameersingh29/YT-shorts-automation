@@ -373,8 +373,10 @@
       ],
       "hook": "Purpose and hunger come out of not liking your life",
       "summary": "The speaker discusses how a lack of contentment with one's current life fuels ambition and the desire for something better.",
-      "status": "pending",
-      "created_at": "2026-06-09T20:56:20.802699+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-09T20:56:20.802699+00:00",
+      "youtube_video_id": "oP1Dki3eh-8",
+      "uploaded_at": "2026-06-10T18:15:11.879781+00:00"
     },
     {
       "clip_id": "16wShP9b_04_ed7cf7",
@@ -657,5 +659,5 @@
       "created_at": "2026-06-09T20:56:58.249545+00:00"
     }
   ],
-  "last_updated": "2026-06-10T07:52:58.500785+00:00"
+  "last_updated": "2026-06-10T18:15:11.879854+00:00"
 }
