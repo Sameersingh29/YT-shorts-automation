@@ -289,8 +289,10 @@
       ],
       "hook": "How to find jobs using AI?",
       "summary": "The speaker explains how to use AI tools like Claude and Codex to automate the job application process, from finding suitable roles to filling out applications.",
-      "status": "pending",
-      "created_at": "2026-06-09T20:56:10.933612+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-09T20:56:10.933612+00:00",
+      "youtube_video_id": "5qhYKQNZTVs",
+      "uploaded_at": "2026-06-10T05:04:36.204814+00:00"
     },
     {
       "clip_id": "16wShP9b_02_2733e7",
@@ -653,5 +655,5 @@
       "created_at": "2026-06-09T20:56:58.249545+00:00"
     }
   ],
-  "last_updated": "2026-06-09T20:56:58.249589+00:00"
+  "last_updated": "2026-06-10T05:04:36.204867+00:00"
 }
