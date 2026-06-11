@@ -415,8 +415,10 @@
       ],
       "hook": "Companies don't work for your benefit, they work for shareholders",
       "summary": "The speaker reveals that companies prioritize shareholder returns, not employee benefits, and will do whatever it takes to achieve that, citing Jack Dorsey as an example.",
-      "status": "pending",
-      "created_at": "2026-06-09T20:56:26.009631+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-09T20:56:26.009631+00:00",
+      "youtube_video_id": "LENBoT67ObY",
+      "uploaded_at": "2026-06-11T08:21:11.011077+00:00"
     },
     {
       "clip_id": "16wShP9b_05_11a3df",
@@ -659,5 +661,5 @@
       "created_at": "2026-06-09T20:56:58.249545+00:00"
     }
   ],
-  "last_updated": "2026-06-10T18:15:11.879854+00:00"
+  "last_updated": "2026-06-11T08:21:11.011125+00:00"
 }
