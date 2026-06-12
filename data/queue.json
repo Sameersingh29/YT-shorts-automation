@@ -499,8 +499,10 @@
       ],
       "hook": "The biggest bottleneck is energy. If energy cost is negligible, everything will be negligible.",
       "summary": "The speaker explains that the future of AI and robotics hinges on solving the energy crisis, with major investments in nuclear fusion and Dyson Swarms, potentially leading to a world where everything is fundamentally free.",
-      "status": "pending",
-      "created_at": "2026-06-09T20:56:36.632512+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-09T20:56:36.632512+00:00",
+      "youtube_video_id": "_hRYnd8HnSk",
+      "uploaded_at": "2026-06-12T08:09:33.337383+00:00"
     },
     {
       "clip_id": "16wShP9b_07_857ddf",
@@ -663,5 +665,5 @@
       "created_at": "2026-06-09T20:56:58.249545+00:00"
     }
   ],
-  "last_updated": "2026-06-11T18:35:57.885199+00:00"
+  "last_updated": "2026-06-12T08:09:33.337439+00:00"
 }
