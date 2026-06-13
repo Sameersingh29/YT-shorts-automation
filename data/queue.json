@@ -583,8 +583,10 @@
       ],
       "hook": "Is YOUR job safe from AI?",
       "summary": "This clip highlights a report by Karpathy showing which jobs have the highest exposure to AI, revealing that many high-paying white-collar jobs are at significant risk.",
-      "status": "pending",
-      "created_at": "2026-06-09T20:56:47.092043+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-09T20:56:47.092043+00:00",
+      "youtube_video_id": "THSFzMSPKXs",
+      "uploaded_at": "2026-06-13T07:10:28.177295+00:00"
     },
     {
       "clip_id": "16wShP9b_09_78c32c",
@@ -907,5 +909,5 @@
       "created_at": "2026-06-13T04:07:09.922498+00:00"
     }
   ],
-  "last_updated": "2026-06-13T04:07:09.922552+00:00"
+  "last_updated": "2026-06-13T07:10:28.177334+00:00"
 }
