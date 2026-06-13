@@ -625,8 +625,10 @@
       ],
       "hook": "Want to build an India job market visualizer?",
       "summary": "The speaker explains how he used AI to quickly build an India job market visualizer by leveraging existing research and a single prompt, highlighting the efficiency of AI in data visualization.",
-      "status": "pending",
-      "created_at": "2026-06-09T20:56:53.130354+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-09T20:56:53.130354+00:00",
+      "youtube_video_id": "fj5FnO1ruJs",
+      "uploaded_at": "2026-06-13T16:58:34.324437+00:00"
     },
     {
       "clip_id": "16wShP9b_10_9656a7",
@@ -909,5 +911,5 @@
       "created_at": "2026-06-13T04:07:09.922498+00:00"
     }
   ],
-  "last_updated": "2026-06-13T07:10:28.177334+00:00"
+  "last_updated": "2026-06-13T16:58:34.324494+00:00"
 }
