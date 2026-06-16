@@ -835,8 +835,10 @@
       ],
       "hook": "Blue on blue is a scary scenario.",
       "summary": "The speaker describes how their special operations unit uniquely trains for 'blue on blue' (friendly fire) scenarios, intentionally creating dangerous situations to prepare soldiers for the chaos of combat.",
-      "status": "pending",
-      "created_at": "2026-06-13T04:06:57.008473+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-13T04:06:57.008473+00:00",
+      "youtube_video_id": "jLFwSLik0hU",
+      "uploaded_at": "2026-06-16T09:09:49.922446+00:00"
     },
     {
       "clip_id": "1ggnBUzG_05_0ab66e",
@@ -919,5 +921,5 @@
       "created_at": "2026-06-13T04:07:09.922498+00:00"
     }
   ],
-  "last_updated": "2026-06-15T19:12:57.763677+00:00"
+  "last_updated": "2026-06-16T09:09:49.922494+00:00"
 }
