@@ -1003,8 +1003,10 @@
       ],
       "hook": "Copying is good. There's nothing like original thinking.",
       "summary": "The speaker explains that all learning, whether it's writing, painting, or talking, comes from copying, and that one must learn the rules before they can break them.",
-      "status": "pending",
-      "created_at": "2026-06-19T04:39:07.528507+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-19T04:39:07.528507+00:00",
+      "youtube_video_id": "ddVRhs3suIU",
+      "uploaded_at": "2026-06-19T17:30:34.820361+00:00"
     },
     {
       "clip_id": "1KMVY1M5_03_c73240",
@@ -1167,5 +1169,5 @@
       "created_at": "2026-06-19T04:39:27.977561+00:00"
     }
   ],
-  "last_updated": "2026-06-19T08:53:08.099794+00:00"
+  "last_updated": "2026-06-19T17:30:34.820402+00:00"
 }
