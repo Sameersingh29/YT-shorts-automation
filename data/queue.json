@@ -1045,8 +1045,10 @@
       ],
       "hook": "Who would I be if I wasn't constrained?",
       "summary": "The speaker reflects on a deeper question of identity beyond the need for performance and success, prioritizing family, peace, and self-exploration over becoming a billionaire.",
-      "status": "pending",
-      "created_at": "2026-06-19T04:39:12.419195+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-19T04:39:12.419195+00:00",
+      "youtube_video_id": "z3C9DOloSiU",
+      "uploaded_at": "2026-06-20T07:12:35.686973+00:00"
     },
     {
       "clip_id": "1KMVY1M5_04_92cee9",
@@ -1169,5 +1171,5 @@
       "created_at": "2026-06-19T04:39:27.977561+00:00"
     }
   ],
-  "last_updated": "2026-06-19T17:30:34.820402+00:00"
+  "last_updated": "2026-06-20T07:12:35.687031+00:00"
 }
