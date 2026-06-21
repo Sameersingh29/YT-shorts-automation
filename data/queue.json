@@ -1129,8 +1129,10 @@
       ],
       "hook": "Discipline, motivation, and obsession: What's the difference?",
       "summary": "The speaker defines discipline as making yourself do something, motivation as wanting to do it, and obsession as being unable to not do it, explaining that current discipline is often the echo of a past obsession.",
-      "status": "pending",
-      "created_at": "2026-06-19T04:39:22.812341+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-19T04:39:22.812341+00:00",
+      "youtube_video_id": "MeLP5LLrbwc",
+      "uploaded_at": "2026-06-21T08:15:13.963233+00:00"
     },
     {
       "clip_id": "1KMVY1M5_06_c55263",
@@ -1173,5 +1175,5 @@
       "created_at": "2026-06-19T04:39:27.977561+00:00"
     }
   ],
-  "last_updated": "2026-06-20T17:05:30.459772+00:00"
+  "last_updated": "2026-06-21T08:15:13.963286+00:00"
 }
