@@ -1255,8 +1255,10 @@
       ],
       "hook": "The easiest way to control someone's mind",
       "summary": "The secret agent explains how physical exhaustion, like sleeping only four hours a day, is used in training to control someone's mind and make them accept all information.",
-      "status": "pending",
-      "created_at": "2026-06-22T04:32:31.477240+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-22T04:32:31.477240+00:00",
+      "youtube_video_id": "w8-Ml1qPJAE",
+      "uploaded_at": "2026-06-22T18:57:02.723496+00:00"
     },
     {
       "clip_id": "1AYynFB3_03_157a6e",
@@ -1339,5 +1341,5 @@
       "created_at": "2026-06-22T04:32:41.412601+00:00"
     }
   ],
-  "last_updated": "2026-06-22T09:28:22.679363+00:00"
+  "last_updated": "2026-06-22T18:57:02.723537+00:00"
 }
