@@ -1297,8 +1297,10 @@
       ],
       "hook": "Take me through a mission from briefing",
       "summary": "The speaker recounts a mission from her time as a junior police agent, targeting a powerful criminal gang involved in human trafficking.",
-      "status": "pending",
-      "created_at": "2026-06-22T04:32:36.220272+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-22T04:32:36.220272+00:00",
+      "youtube_video_id": "CZAZo_bobYc",
+      "uploaded_at": "2026-06-23T07:04:00.331336+00:00"
     },
     {
       "clip_id": "1AYynFB3_04_333af7",
@@ -1341,5 +1343,5 @@
       "created_at": "2026-06-22T04:32:41.412601+00:00"
     }
   ],
-  "last_updated": "2026-06-22T18:57:02.723537+00:00"
+  "last_updated": "2026-06-23T07:04:00.331414+00:00"
 }
