@@ -1339,9 +1339,11 @@
       ],
       "hook": "I learned how to do a massage",
       "summary": "The speaker used a special massage technique to put her target to sleep, allowing her team to infiltrate the house and accomplish their mission.",
-      "status": "pending",
-      "created_at": "2026-06-22T04:32:41.412601+00:00"
+      "status": "uploaded",
+      "created_at": "2026-06-22T04:32:41.412601+00:00",
+      "youtube_video_id": "4BWQvutTIpo",
+      "uploaded_at": "2026-06-23T17:27:23.211905+00:00"
     }
   ],
-  "last_updated": "2026-06-23T07:04:00.331414+00:00"
+  "last_updated": "2026-06-23T17:27:23.211950+00:00"
 }
