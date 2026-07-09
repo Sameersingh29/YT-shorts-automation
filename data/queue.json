@@ -1591,8 +1591,10 @@
       ],
       "hook": "When is there no going back?",
       "summary": "This clip discusses the 'point of no return' for individuals in corrupt systems, often tied to family and the desire for 'plum postings' in high-revenue departments.",
-      "status": "pending",
-      "created_at": "2026-07-06T18:24:26.136925+00:00"
+      "status": "uploaded",
+      "created_at": "2026-07-06T18:24:26.136925+00:00",
+      "youtube_video_id": "GItkEAH7cZ4",
+      "uploaded_at": "2026-07-09T17:29:27.908438+00:00"
     },
     {
       "clip_id": "12kbRXe0_07_8b01f3",
@@ -1995,5 +1997,5 @@
       "created_at": "2026-07-07T03:45:50.963615+00:00"
     }
   ],
-  "last_updated": "2026-07-09T07:02:26.040330+00:00"
+  "last_updated": "2026-07-09T17:29:27.908488+00:00"
 }
