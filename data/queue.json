@@ -1633,8 +1633,10 @@
       ],
       "hook": "I have never felt that they are to help me",
       "summary": "The speaker explains that police were created to subjugate the citizenry, not to help them, which is why people fear them.",
-      "status": "pending",
-      "created_at": "2026-07-06T18:24:32.128832+00:00"
+      "status": "uploaded",
+      "created_at": "2026-07-06T18:24:32.128832+00:00",
+      "youtube_video_id": "jByvl2dWShI",
+      "uploaded_at": "2026-07-10T07:01:50.930135+00:00"
     },
     {
       "clip_id": "12kbRXe0_08_c345b1",
@@ -1997,5 +1999,5 @@
       "created_at": "2026-07-07T03:45:50.963615+00:00"
     }
   ],
-  "last_updated": "2026-07-09T17:29:27.908488+00:00"
+  "last_updated": "2026-07-10T07:01:50.930181+00:00"
 }
