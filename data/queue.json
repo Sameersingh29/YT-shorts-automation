@@ -1759,8 +1759,10 @@
       ],
       "hook": "One thing which is very shameful today is failure.",
       "summary": "The speaker discusses how society views public failure as shameful, hindering individuals from taking more risks and ultimately succeeding.",
-      "status": "pending",
-      "created_at": "2026-07-07T03:45:23.313849+00:00"
+      "status": "uploaded",
+      "created_at": "2026-07-07T03:45:23.313849+00:00",
+      "youtube_video_id": "zKLGxHkxj9o",
+      "uploaded_at": "2026-07-11T16:27:15.131508+00:00"
     },
     {
       "clip_id": "1G_Z5crL_03_f73f9c",
@@ -2003,5 +2005,5 @@
       "created_at": "2026-07-07T03:45:50.963615+00:00"
     }
   ],
-  "last_updated": "2026-07-11T05:57:59.880871+00:00"
+  "last_updated": "2026-07-11T16:27:15.131559+00:00"
 }
