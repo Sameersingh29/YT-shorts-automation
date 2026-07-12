@@ -1843,8 +1843,10 @@
       ],
       "hook": "People fearing their social media followers, you're already a celebrity.",
       "summary": "The speaker discusses how the fear of social media followers shapes young people's personalities, making them prioritize audience approval over genuine self-expression.",
-      "status": "pending",
-      "created_at": "2026-07-07T03:45:33.032852+00:00"
+      "status": "uploaded",
+      "created_at": "2026-07-07T03:45:33.032852+00:00",
+      "youtube_video_id": "aAgswQrakmo",
+      "uploaded_at": "2026-07-12T16:28:43.899263+00:00"
     },
     {
       "clip_id": "1G_Z5crL_05_771197",
@@ -2007,5 +2009,5 @@
       "created_at": "2026-07-07T03:45:50.963615+00:00"
     }
   ],
-  "last_updated": "2026-07-12T06:18:25.707593+00:00"
+  "last_updated": "2026-07-12T16:28:43.899314+00:00"
 }
