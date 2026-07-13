@@ -1927,8 +1927,10 @@
       ],
       "hook": "Successful people don't gossip, they gather information.",
       "summary": "Successful people are extraordinary at keeping secrets, using information to improve intelligence rather than for gossip, which builds trust and asymmetric insight.",
-      "status": "pending",
-      "created_at": "2026-07-07T03:45:41.975010+00:00"
+      "status": "uploaded",
+      "created_at": "2026-07-07T03:45:41.975010+00:00",
+      "youtube_video_id": "gYZc7Q2Z2ds",
+      "uploaded_at": "2026-07-13T17:31:52.103024+00:00"
     },
     {
       "clip_id": "1G_Z5crL_07_d89598",
@@ -2011,5 +2013,5 @@
       "created_at": "2026-07-07T03:45:50.963615+00:00"
     }
   ],
-  "last_updated": "2026-07-13T06:38:12.502081+00:00"
+  "last_updated": "2026-07-13T17:31:52.103069+00:00"
 }
