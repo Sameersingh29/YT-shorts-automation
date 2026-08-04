@@ -2095,8 +2095,10 @@
       ],
       "hook": "There's no problem in our blood.",
       "summary": "The speaker passionately argues that the lack of success in Indian sports is not due to inherent talent issues but rather a deeply flawed system run by non-professionals driven by nepotism and power.",
-      "status": "pending",
-      "created_at": "2026-08-04T02:51:07.912306+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-04T02:51:07.912306+00:00",
+      "youtube_video_id": "lRdET9Z1JM0",
+      "uploaded_at": "2026-08-04T17:14:20.128703+00:00"
     },
     {
       "clip_id": "11MiKf_-_03_13339c",
@@ -2259,5 +2261,5 @@
       "created_at": "2026-08-04T02:51:29.353413+00:00"
     }
   ],
-  "last_updated": "2026-08-04T06:10:58.131750+00:00"
+  "last_updated": "2026-08-04T17:14:20.128750+00:00"
 }
