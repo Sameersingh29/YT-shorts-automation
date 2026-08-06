@@ -2221,8 +2221,10 @@
       ],
       "hook": "How many players have been produced by me?",
       "summary": "The speaker challenges the notion that football development requires significant financial investment, citing his own academy's success in producing international players and contrasting it with the lack of output from ISL clubs.",
-      "status": "pending",
-      "created_at": "2026-08-04T02:51:24.114384+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-04T02:51:24.114384+00:00",
+      "youtube_video_id": "JkDAO2TXapU",
+      "uploaded_at": "2026-08-06T06:11:22.850591+00:00"
     },
     {
       "clip_id": "11MiKf_-_06_004ce1",
@@ -2265,5 +2267,5 @@
       "created_at": "2026-08-04T02:51:29.353413+00:00"
     }
   ],
-  "last_updated": "2026-08-05T17:04:27.354596+00:00"
+  "last_updated": "2026-08-06T06:11:22.850639+00:00"
 }
