@@ -2305,8 +2305,10 @@
       ],
       "hook": "90% of our distractions, they don't come from",
       "summary": "Most distractions originate from within, and while we know what to do to achieve our goals, something crucial is missing that prevents us from acting on that knowledge.",
-      "status": "pending",
-      "created_at": "2026-08-07T02:58:56.155576+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-07T02:58:56.155576+00:00",
+      "youtube_video_id": "9Z0KALdFis4",
+      "uploaded_at": "2026-08-07T16:25:44.633946+00:00"
     },
     {
       "clip_id": "1hGTA15t_02_55c3c8",
@@ -2589,5 +2591,5 @@
       "created_at": "2026-08-07T02:59:40.442142+00:00"
     }
   ],
-  "last_updated": "2026-08-07T05:15:34.939199+00:00"
+  "last_updated": "2026-08-07T16:25:44.633993+00:00"
 }
