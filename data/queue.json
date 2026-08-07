@@ -2263,8 +2263,10 @@
       ],
       "hook": "For me, there is nothing known as second place.",
       "summary": "The speaker, from an armed forces background, passionately explains his extreme competitive mindset, stating that second place is the same as last and that he would be devastated to lose to anyone, even his own son or father.",
-      "status": "pending",
-      "created_at": "2026-08-04T02:51:29.353413+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-04T02:51:29.353413+00:00",
+      "youtube_video_id": "Ghhb_9XFM4o",
+      "uploaded_at": "2026-08-07T05:15:34.939151+00:00"
     },
     {
       "clip_id": "1hGTA15t_01_c2f469",
@@ -2587,5 +2589,5 @@
       "created_at": "2026-08-07T02:59:40.442142+00:00"
     }
   ],
-  "last_updated": "2026-08-07T02:59:40.442205+00:00"
+  "last_updated": "2026-08-07T05:15:34.939199+00:00"
 }
