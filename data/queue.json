@@ -2389,8 +2389,10 @@
       ],
       "hook": "We have an inborn negativity bias",
       "summary": "The speaker explains that humans have an inborn negativity bias, constantly looking for threats, and if we are not conscious of this bias, it will reinforce a negative worldview and change our behavior.",
-      "status": "pending",
-      "created_at": "2026-08-07T02:59:08.491521+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-07T02:59:08.491521+00:00",
+      "youtube_video_id": "7-ZrlcIBavE",
+      "uploaded_at": "2026-08-08T15:57:27.816126+00:00"
     },
     {
       "clip_id": "1hGTA15t_04_7f4e7e",
@@ -2593,5 +2595,5 @@
       "created_at": "2026-08-07T02:59:40.442142+00:00"
     }
   ],
-  "last_updated": "2026-08-08T04:35:53.758246+00:00"
+  "last_updated": "2026-08-08T15:57:27.816173+00:00"
 }
