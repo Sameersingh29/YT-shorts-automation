@@ -2473,8 +2473,10 @@
       ],
       "hook": "How long can a rat swim in water?",
       "summary": "The speaker shares the 'hope floats' experiment with rats, demonstrating that hope and persistence can dramatically increase an organism's ability to endure, highlighting that the number one factor in achieving a goal is not quitting.",
-      "status": "pending",
-      "created_at": "2026-08-07T02:59:21.129991+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-07T02:59:21.129991+00:00",
+      "youtube_video_id": "pCc5M_uMlw8",
+      "uploaded_at": "2026-08-09T15:59:37.155798+00:00"
     },
     {
       "clip_id": "1hGTA15t_06_131d59",
@@ -2597,5 +2599,5 @@
       "created_at": "2026-08-07T02:59:40.442142+00:00"
     }
   ],
-  "last_updated": "2026-08-09T04:47:11.130487+00:00"
+  "last_updated": "2026-08-09T15:59:37.155848+00:00"
 }
