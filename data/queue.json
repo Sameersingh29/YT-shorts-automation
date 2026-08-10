@@ -2557,8 +2557,10 @@
       ],
       "hook": "The reality right now is 11 million bits of information",
       "summary": "Our conscious mind can only process 50 bits of information per second, meaning we don't see reality clearly, but rather a simulation filtered by our beliefs.",
-      "status": "pending",
-      "created_at": "2026-08-07T02:59:33.758949+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-07T02:59:33.758949+00:00",
+      "youtube_video_id": "D3MZjXfzCIU",
+      "uploaded_at": "2026-08-10T16:24:46.518831+00:00"
     },
     {
       "clip_id": "1hGTA15t_08_836c29",
@@ -2921,5 +2923,5 @@
       "created_at": "2026-08-10T02:11:47.952586+00:00"
     }
   ],
-  "last_updated": "2026-08-10T05:06:34.019432+00:00"
+  "last_updated": "2026-08-10T16:24:46.518888+00:00"
 }
