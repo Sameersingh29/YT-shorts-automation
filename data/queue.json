@@ -2641,8 +2641,10 @@
       ],
       "hook": "That's how powerful the placebo effect.",
       "summary": "This clip discusses the immense power of the placebo effect and the importance of vulnerability in men for healing.",
-      "status": "pending",
-      "created_at": "2026-08-10T02:11:00.263165+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-10T02:11:00.263165+00:00",
+      "youtube_video_id": "vZRAS9iRYdM",
+      "uploaded_at": "2026-08-11T16:26:27.353822+00:00"
     },
     {
       "clip_id": "1WmSIZCg_02_1b63e3",
@@ -2925,5 +2927,5 @@
       "created_at": "2026-08-10T02:11:47.952586+00:00"
     }
   ],
-  "last_updated": "2026-08-11T04:49:52.458417+00:00"
+  "last_updated": "2026-08-11T16:26:27.353890+00:00"
 }
