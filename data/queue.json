@@ -2599,8 +2599,10 @@
       ],
       "hook": "Limiting beliefs are always hidden. It's like your face.",
       "summary": "Limiting beliefs are hidden thoughts that decrease motivation and increase suffering, and to identify them, one must reflect on areas where they feel stuck.",
-      "status": "pending",
-      "created_at": "2026-08-07T02:59:40.442142+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-07T02:59:40.442142+00:00",
+      "youtube_video_id": "chH0j-VPn6Q",
+      "uploaded_at": "2026-08-11T04:49:52.458371+00:00"
     },
     {
       "clip_id": "1WmSIZCg_01_9cdda6",
@@ -2923,5 +2925,5 @@
       "created_at": "2026-08-10T02:11:47.952586+00:00"
     }
   ],
-  "last_updated": "2026-08-10T16:24:46.518888+00:00"
+  "last_updated": "2026-08-11T04:49:52.458417+00:00"
 }
