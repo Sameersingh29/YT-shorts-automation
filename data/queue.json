@@ -2683,8 +2683,10 @@
       ],
       "hook": "Providence is this energy of abundance.",
       "summary": "This clip defines providence as an energy of abundance, emphasizing recognizing what we already have without filters of scarcity.",
-      "status": "pending",
-      "created_at": "2026-08-10T02:11:09.512534+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-10T02:11:09.512534+00:00",
+      "youtube_video_id": "Bd9kJCFrhz4",
+      "uploaded_at": "2026-08-12T05:15:11.824434+00:00"
     },
     {
       "clip_id": "1WmSIZCg_03_e569cb",
@@ -2927,5 +2929,5 @@
       "created_at": "2026-08-10T02:11:47.952586+00:00"
     }
   ],
-  "last_updated": "2026-08-11T16:26:27.353890+00:00"
+  "last_updated": "2026-08-12T05:15:11.824478+00:00"
 }
