@@ -2977,8 +2977,10 @@
       ],
       "hook": "This isn't going to be like a kid who had some problems.",
       "summary": "The speaker reflects on a pivotal moment in his youth where he realized his wild behavior was no longer 'cute' and would lead to serious consequences, acknowledging his 'feral' upbringing and how it still impacts him.",
-      "status": "pending",
-      "created_at": "2026-08-31T04:25:49.057705+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-31T04:25:49.057705+00:00",
+      "youtube_video_id": "_t17mC9AQLI",
+      "uploaded_at": "2026-08-31T10:01:19.620705+00:00"
     },
     {
       "clip_id": "1dlnGcHs_02_04d3c4",
@@ -3181,5 +3183,5 @@
       "created_at": "2026-08-31T04:26:21.632908+00:00"
     }
   ],
-  "last_updated": "2026-08-31T04:26:21.632967+00:00"
+  "last_updated": "2026-08-31T10:01:19.620752+00:00"
 }
