@@ -3061,8 +3061,10 @@
       ],
       "hook": "The nervous system can be divided into five things",
       "summary": "The speaker explains how the nervous system processes sensation, which is non-negotiable based on receptors, and perception, which is negotiable and can be controlled by what we choose to focus on.",
-      "status": "pending",
-      "created_at": "2026-08-31T04:26:02.092141+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-31T04:26:02.092141+00:00",
+      "youtube_video_id": "W3erDRbvC2A",
+      "uploaded_at": "2026-09-01T08:52:01.980980+00:00"
     },
     {
       "clip_id": "1dlnGcHs_04_86ec03",
@@ -3345,5 +3347,5 @@
       "created_at": "2026-09-01T04:09:26.234462+00:00"
     }
   ],
-  "last_updated": "2026-09-01T04:09:26.234522+00:00"
+  "last_updated": "2026-09-01T08:52:01.981027+00:00"
 }
