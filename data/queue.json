@@ -3145,8 +3145,10 @@
       ],
       "hook": "If you want to change your brain as an adult...",
       "summary": "This clip explains that adult neuroplasticity is triggered by intense focus on a particular perception during learning and occurs during deep sleep and rest, emphasizing the importance of both for brain change.",
-      "status": "pending",
-      "created_at": "2026-08-31T04:26:15.043972+00:00"
+      "status": "uploaded",
+      "created_at": "2026-08-31T04:26:15.043972+00:00",
+      "youtube_video_id": "jV7o4vSNLPc",
+      "uploaded_at": "2026-09-02T08:05:21.299083+00:00"
     },
     {
       "clip_id": "1dlnGcHs_06_457553",
@@ -3349,5 +3351,5 @@
       "created_at": "2026-09-01T04:09:26.234462+00:00"
     }
   ],
-  "last_updated": "2026-09-01T18:45:05.590692+00:00"
+  "last_updated": "2026-09-02T08:05:21.299128+00:00"
 }
