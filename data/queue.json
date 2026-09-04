@@ -3313,8 +3313,10 @@
       ],
       "hook": "In politics, you never know",
       "summary": "The speaker explains his decision to call for early elections, emphasizing his willingness to take risks and fight for what he believed was right for his country, even if it meant losing his position.",
-      "status": "pending",
-      "created_at": "2026-09-01T04:09:19.117338+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-01T04:09:19.117338+00:00",
+      "youtube_video_id": "r90H0LEqHRg",
+      "uploaded_at": "2026-09-04T08:10:39.130107+00:00"
     },
     {
       "clip_id": "16g6H94Q_04_065b45",
@@ -3677,5 +3679,5 @@
       "created_at": "2026-09-04T03:47:39.356506+00:00"
     }
   ],
-  "last_updated": "2026-09-04T03:47:39.356552+00:00"
+  "last_updated": "2026-09-04T08:10:39.130173+00:00"
 }
