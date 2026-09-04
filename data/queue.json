@@ -3355,8 +3355,10 @@
       ],
       "hook": "There's a lot of power in bureaucracy",
       "summary": "The speaker reveals the unexpected power of bureaucracy, especially within the EU, which can limit political decisions and requires bravery from politicians to challenge it.",
-      "status": "pending",
-      "created_at": "2026-09-01T04:09:26.234462+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-01T04:09:26.234462+00:00",
+      "youtube_video_id": "vJp2X66Bgkg",
+      "uploaded_at": "2026-09-04T18:32:20.735643+00:00"
     },
     {
       "clip_id": "17HC_cJA_01_28628e",
@@ -3679,5 +3681,5 @@
       "created_at": "2026-09-04T03:47:39.356506+00:00"
     }
   ],
-  "last_updated": "2026-09-04T08:10:39.130173+00:00"
+  "last_updated": "2026-09-04T18:32:20.735700+00:00"
 }
