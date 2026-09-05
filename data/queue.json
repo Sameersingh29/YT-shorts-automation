@@ -3397,8 +3397,10 @@
       ],
       "hook": "This is why our money goes away.",
       "summary": "The speaker passionately argues against seriousness and weakness, encouraging listeners to enjoy life and not be afraid to express themselves, even if it means giving a podcast or speaking their mind.",
-      "status": "pending",
-      "created_at": "2026-09-04T03:46:52.657997+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-04T03:46:52.657997+00:00",
+      "youtube_video_id": "h3FJLMCEPnE",
+      "uploaded_at": "2026-09-05T07:49:58.519707+00:00"
     },
     {
       "clip_id": "17HC_cJA_02_74eeae",
@@ -3681,5 +3683,5 @@
       "created_at": "2026-09-04T03:47:39.356506+00:00"
     }
   ],
-  "last_updated": "2026-09-04T18:32:20.735700+00:00"
+  "last_updated": "2026-09-05T07:49:58.519758+00:00"
 }
