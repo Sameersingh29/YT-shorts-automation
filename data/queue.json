@@ -3565,8 +3565,10 @@
       ],
       "hook": "Stand up for yourself, prioritize your own interests",
       "summary": "The speaker emphasizes the importance of standing up for oneself and not conforming to societal expectations, highlighting personal interests like traveling.",
-      "status": "pending",
-      "created_at": "2026-09-04T03:47:20.300409+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-04T03:47:20.300409+00:00",
+      "youtube_video_id": "vsiY3SMp2Pg",
+      "uploaded_at": "2026-09-07T08:34:52.678424+00:00"
     },
     {
       "clip_id": "17HC_cJA_06_30a997",
@@ -3849,5 +3851,5 @@
       "created_at": "2026-09-07T03:33:09.930327+00:00"
     }
   ],
-  "last_updated": "2026-09-07T03:33:09.930382+00:00"
+  "last_updated": "2026-09-07T08:34:52.678481+00:00"
 }
