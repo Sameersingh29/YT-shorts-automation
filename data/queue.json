@@ -3691,8 +3691,10 @@
       ],
       "hook": "Why I don't waste time on disrespect",
       "summary": "The speaker explains his philosophy of not engaging in disrespectful conversations because he values time as money, emphasizing that time is a precious resource.",
-      "status": "pending",
-      "created_at": "2026-09-04T03:47:39.356506+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-04T03:47:39.356506+00:00",
+      "youtube_video_id": "QeZikm_KTwc",
+      "uploaded_at": "2026-09-08T18:55:57.105986+00:00"
     },
     {
       "clip_id": "104Irpc5_01_032b9a",
@@ -3855,5 +3857,5 @@
       "created_at": "2026-09-07T03:33:09.930327+00:00"
     }
   ],
-  "last_updated": "2026-09-08T08:17:37.916700+00:00"
+  "last_updated": "2026-09-08T18:55:57.106041+00:00"
 }
