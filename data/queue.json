@@ -3649,8 +3649,10 @@
       ],
       "hook": "I want to die a satisfied death",
       "summary": "The speaker reflects on the desire to live a life without regrets, aiming for a satisfied death where every moment has been fully experienced and utilized.",
-      "status": "pending",
-      "created_at": "2026-09-04T03:47:33.342634+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-04T03:47:33.342634+00:00",
+      "youtube_video_id": "pr41nDBZIcU",
+      "uploaded_at": "2026-09-08T08:17:37.916653+00:00"
     },
     {
       "clip_id": "17HC_cJA_08_7ee362",
@@ -3853,5 +3855,5 @@
       "created_at": "2026-09-07T03:33:09.930327+00:00"
     }
   ],
-  "last_updated": "2026-09-07T19:21:18.698222+00:00"
+  "last_updated": "2026-09-08T08:17:37.916700+00:00"
 }
