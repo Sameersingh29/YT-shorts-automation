@@ -3775,8 +3775,10 @@
       ],
       "hook": "When you are buying clothes...",
       "summary": "People spend more time checking clothes they wear occasionally than reading food labels for items they consume daily, highlighting a critical misplacement of priorities.",
-      "status": "pending",
-      "created_at": "2026-09-07T03:32:59.186771+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-07T03:32:59.186771+00:00",
+      "youtube_video_id": "mQ_tg164QJ8",
+      "uploaded_at": "2026-09-09T18:48:36.083252+00:00"
     },
     {
       "clip_id": "104Irpc5_03_ab1653",
@@ -3859,5 +3861,5 @@
       "created_at": "2026-09-07T03:33:09.930327+00:00"
     }
   ],
-  "last_updated": "2026-09-09T08:20:12.154232+00:00"
+  "last_updated": "2026-09-09T18:48:36.083300+00:00"
 }
