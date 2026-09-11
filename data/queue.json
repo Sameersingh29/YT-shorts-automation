@@ -3943,8 +3943,10 @@
       ],
       "hook": "We're starting to train robots in digital worlds.",
       "summary": "The speaker discusses the revolutionary shift in robot training, moving from real-world limitations to digital simulations for faster learning and a 'big bang moment' for robotics, with tools like Omniverse making it possible.",
-      "status": "pending",
-      "created_at": "2026-09-10T03:41:50.940573+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-10T03:41:50.940573+00:00",
+      "youtube_video_id": "I85xGCP-dEI",
+      "uploaded_at": "2026-09-11T18:43:27.365135+00:00"
     },
     {
       "clip_id": "1KgPvQxK_03_e28b39",
@@ -4107,5 +4109,5 @@
       "created_at": "2026-09-10T03:42:14.889359+00:00"
     }
   ],
-  "last_updated": "2026-09-11T08:14:56.007632+00:00"
+  "last_updated": "2026-09-11T18:43:27.365195+00:00"
 }
