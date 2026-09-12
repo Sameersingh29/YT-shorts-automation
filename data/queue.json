@@ -3985,8 +3985,10 @@
       ],
       "hook": "Imagine a robot in a factory...",
       "summary": "The speaker explains how physical simulations in Omniverse can train robots much faster and in various situations, leading to quicker learning and deployment.",
-      "status": "pending",
-      "created_at": "2026-09-10T03:41:56.866956+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-10T03:41:56.866956+00:00",
+      "youtube_video_id": "6GB85Y3YbQI",
+      "uploaded_at": "2026-09-12T08:05:26.531411+00:00"
     },
     {
       "clip_id": "1KgPvQxK_04_38da92",
@@ -4109,5 +4111,5 @@
       "created_at": "2026-09-10T03:42:14.889359+00:00"
     }
   ],
-  "last_updated": "2026-09-11T18:43:27.365195+00:00"
+  "last_updated": "2026-09-12T08:05:26.531451+00:00"
 }
