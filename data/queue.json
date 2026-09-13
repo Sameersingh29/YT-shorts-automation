@@ -4069,8 +4069,10 @@
       ],
       "hook": "Eight years later, we've increased the energy efficiency",
       "summary": "The speaker explains how computing energy efficiency has increased 10,000 times in eight years, enabling more intelligent AI systems.",
-      "status": "pending",
-      "created_at": "2026-09-10T03:42:08.594218+00:00"
+      "status": "uploaded",
+      "created_at": "2026-09-10T03:42:08.594218+00:00",
+      "youtube_video_id": "CkD3IW6sZmI",
+      "uploaded_at": "2026-09-13T08:29:55.320504+00:00"
     },
     {
       "clip_id": "1KgPvQxK_06_880880",
@@ -4113,5 +4115,5 @@
       "created_at": "2026-09-10T03:42:14.889359+00:00"
     }
   ],
-  "last_updated": "2026-09-12T17:47:45.063062+00:00"
+  "last_updated": "2026-09-13T08:29:55.320560+00:00"
 }
