@@ -78,7 +78,7 @@ def get_next_schedule_time(slot: str = "auto") -> str:
     Calculate the next scheduled publish time in ISO 8601 format.
 
     Args:
-        slot: "morning" (9 AM IST), "evening" (9 PM IST), or "auto" (next available).
+        slot: "morning" (first schedule time IST), "evening" (last schedule time IST), or "auto" (next available).
 
     Returns:
         ISO 8601 datetime string for YouTube publishAt.
@@ -86,21 +86,22 @@ def get_next_schedule_time(slot: str = "auto") -> str:
     ist = timezone(timedelta(hours=IST_UTC_OFFSET_HOURS))
     now_ist = datetime.now(ist)
 
-    morning = now_ist.replace(hour=9, minute=0, second=0, microsecond=0)
-    evening = now_ist.replace(hour=21, minute=0, second=0, microsecond=0)
+    schedule_times = SCHEDULE_TIMES_IST
+    targets = []
+    for t in schedule_times:
+        hour, minute = map(int, t.split(":"))
+        target = now_ist.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if now_ist >= target:
+            target = target + timedelta(days=1)
+        targets.append(target)
 
     if slot == "morning":
-        target = morning if now_ist < morning else morning + timedelta(days=1)
+        target = min(targets)
     elif slot == "evening":
-        target = evening if now_ist < evening else evening + timedelta(days=1)
+        target = max(targets)
     else:
         # Auto: pick the next available slot
-        if now_ist < morning:
-            target = morning
-        elif now_ist < evening:
-            target = evening
-        else:
-            target = morning + timedelta(days=1)
+        target = min(targets)
 
     # Convert to UTC for YouTube API
     target_utc = target.astimezone(timezone.utc)

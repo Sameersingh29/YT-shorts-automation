@@ -1,10 +1,9 @@
 name: Upload Clip
 
 on:
-  # Runs 2x daily: 9 AM IST and 9 PM IST
+  # Runs 1x daily: 7 PM IST (13:30 UTC)
   schedule:
-    - cron: '30 3 * * *'   # 3:30 AM UTC = 9:00 AM IST
-    - cron: '30 15 * * *'  # 3:30 PM UTC = 9:00 PM IST
+    - cron: '30 13 * * *'  # 13:30 UTC = 7:00 PM IST
 
   # Manual trigger
   workflow_dispatch:

@@ -77,10 +77,10 @@ POWER_WORDS = {
 MIN_CLIP_DURATION = 30   # seconds
 MAX_CLIP_DURATION = 45   # seconds
 CLIPS_PER_VIDEO = 10
-UPLOADS_PER_DAY = 2
+UPLOADS_PER_DAY = 1
 
 # ─── Schedule (IST = UTC+5:30) ───────────────────────────
-SCHEDULE_TIMES_IST = ["09:00", "21:00"]
+SCHEDULE_TIMES_IST = ["19:00"]
 IST_UTC_OFFSET_HOURS = 5.5
 
 # ─── Whisper (Transcription) ─────────────────────────────
