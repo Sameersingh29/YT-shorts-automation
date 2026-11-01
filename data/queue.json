@@ -4153,8 +4153,10 @@
       ],
       "hook": "You need to be updated with all the current affairs",
       "summary": "An ADC must be constantly updated on global and domestic current affairs to answer any question the President might ask, demonstrating a high level of preparedness and precision.",
-      "status": "pending",
-      "created_at": "2026-11-01T04:54:19.640663+00:00"
+      "status": "uploaded",
+      "created_at": "2026-11-01T04:54:19.640663+00:00",
+      "youtube_video_id": "k0AvD4lsNV0",
+      "uploaded_at": "2026-11-01T18:29:06.748394+00:00"
     },
     {
       "clip_id": "1oa_fIrP_02_912f5f",
@@ -4197,5 +4199,5 @@
       "created_at": "2026-11-01T04:54:25.114412+00:00"
     }
   ],
-  "last_updated": "2026-11-01T04:54:25.114466+00:00"
+  "last_updated": "2026-11-01T18:29:06.748443+00:00"
 }
