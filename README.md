@@ -9,7 +9,7 @@ Fully automated pipeline that converts long-form podcast videos into viral YouTu
 3. **AI-selects** the best moments using Gemini (mix of viral + informative)
 4. **Processes** each clip: 9:16 split layout + Hormozi-style captions
 5. **Generates** thumbnails, titles, descriptions, and hashtags
-6. **Uploads** 2 clips/day to YouTube at 9 AM & 9 PM IST
+6. **Uploads** 1 clip/day to YouTube at 7 PM IST
 7. **Tracks** performance on a live analytics dashboard
 
 ## Cost: $0/month
@@ -95,7 +95,7 @@ python upload_clip.py --slot morning
 
 The workflows will run automatically:
 - **Process Video**: Every 3 days (or manually)
-- **Upload Clip**: Daily at 9 AM & 9 PM IST
+- **Upload Clip**: Daily at 7 PM IST (13:30 UTC)
 
 ## Project Structure
 
