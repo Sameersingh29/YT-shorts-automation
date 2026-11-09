@@ -4,7 +4,7 @@ Upload Clip — Main entry point for the daily upload pipeline.
 Picks the next pending clip from the queue, downloads it from Google Drive,
 uploads it to YouTube with scheduling, and updates analytics.
 
-Runs 2x daily via GitHub Actions cron (9 AM & 9 PM IST).
+Runs daily via GitHub Actions cron (7 PM IST).
 
 Usage:
     python upload_clip.py [--slot morning|evening|auto]
@@ -37,7 +37,7 @@ def upload_next_clip(time_slot: str = "auto") -> bool:
     Upload the next pending clip from the queue to YouTube.
 
     Args:
-        time_slot: "morning" (9 AM IST), "evening" (9 PM IST), or "auto".
+        time_slot: "morning" or "evening" (both schedule for 7 PM IST), or "auto".
 
     Returns:
         True if upload was successful, False otherwise.
